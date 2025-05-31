@@ -1,0 +1,368 @@
+/* css/style.css */
+
+/* Reset básico e configurações globais */
+* {
+    box-sizing: border-box; /* Importante para um layout mais previsível */
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte mais moderna */
+    line-height: 1.6;
+    background-color: #f8f9fa; /* Cor de fundo suave */
+    color: #343a40; /* Cor de texto principal */
+    display: flex; /* Para o footer grudar no final da página */
+    flex-direction: column; /* Para o footer grudar no final da página */
+    min-height: 100vh; /* Para o footer grudar no final da página */
+}
+
+/* Cabeçalho */
+header {
+    background-color: #343a40; /* Azul escuro */
+    color: #ffffff;
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    font-size: 1.8em;
+    margin-bottom: 0.5rem; /* Espaço se quebrar linha */
+}
+
+#auth-container {
+    display: flex;
+    align-items: center;
+}
+
+#auth-container button {
+    margin-left: 10px;
+    padding: 0.6em 1em;
+    background-color: #007bff; /* Azul primário */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+#auth-container button:hover {
+    background-color: #0056b3;
+}
+
+#auth-container #logout-btn {
+    background-color: #dc3545; /* Vermelho perigo */
+}
+#auth-container #logout-btn:hover {
+    background-color: #c82333;
+}
+
+#user-info {
+    margin-right: 15px;
+    font-size: 0.9em;
+}
+
+/* Navegação Principal */
+nav#app-nav {
+    background-color: #495057; /* Cinza escuro */
+    padding: 0.75rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+nav#app-nav button {
+    margin: 0.3rem 0.5rem;
+    padding: 0.7em 1.2em;
+    background-color: #6c757d; /* Cinza secundário */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    font-size: 0.95em;
+}
+
+nav#app-nav button:hover {
+    background-color: #5a6268;
+}
+
+/* Conteúdo Principal */
+main {
+    flex-grow: 1; /* Faz o main ocupar o espaço restante para o footer ir para baixo */
+    padding: 1.5rem;
+    max-width: 1200px; /* Limita a largura máxima em telas grandes */
+    margin: 0 auto; /* Centraliza o conteúdo */
+    width: 100%;
+}
+
+section {
+    background-color: #ffffff;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+h2 {
+    color: #007bff; /* Azul primário */
+    border-bottom: 2px solid #dee2e6; /* Cinza claro */
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 1.6em;
+}
+
+h3 {
+    color: #495057; /* Cinza escuro */
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.3em;
+}
+
+/* Estilos de Formulário */
+form div {
+    margin-bottom: 1rem;
+}
+
+form label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 600; /* Semi-bold */
+    color: #495057;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="email"], /* Se for usar */
+form textarea,
+form select {
+    width: 100%; /* Ocupa toda a largura disponível */
+    padding: 0.75em;
+    border: 1px solid #ced4da; /* Cinza borda */
+    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+form input[type="text"]:focus,
+form input[type="number"]:focus,
+form input[type="email"]:focus,
+form textarea:focus,
+form select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    outline: none;
+}
+
+
+form button[type="submit"],
+form button[type="button"] {
+    padding: 0.75em 1.5em;
+    background-color: #28a745; /* Verde sucesso */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    margin-top: 0.5rem; /* Espaço acima do botão */
+}
+
+form button[type="submit"]:hover,
+form button[type="button"]:hover {
+    background-color: #218838;
+}
+
+#add-ingrediente-btn {
+    background-color: #17a2b8; /* Azul info */
+    margin-bottom: 1rem; /* Espaço abaixo do botão de adicionar */
+}
+#add-ingrediente-btn:hover {
+    background-color: #138496;
+}
+
+.remover-ingrediente-btn {
+    background-color: #dc3545 !important; /* Vermelho perigo com !important para sobrescrever se necessário */
+    color: white;
+    padding: 0.4em 0.8em !important;
+    font-size: 0.8em !important;
+    margin-left: 10px; /* Espaço do lado do input de quantidade */
+}
+.remover-ingrediente-btn:hover {
+    background-color: #c82333 !important;
+}
+
+
+/* Listagem de Receitas */
+#receitas-container .receita-item {
+    border: 1px solid #e9ecef; /* Cinza claro */
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#receitas-container .receita-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+#receitas-container .receita-item h3 {
+    margin-top: 0;
+    color: #007bff;
+}
+
+/* Listas (materiais, ingredientes na receita) */
+#lista-materiais-cadastrados li,
+#detalhe-receita-ingredientes li {
+    list-style: none; /* Remove marcadores padrão */
+    padding: 0.6em 0;
+    border-bottom: 1px dashed #dee2e6;
+    font-size: 0.95em;
+}
+
+#lista-materiais-cadastrados li:last-child,
+#detalhe-receita-ingredientes li:last-child {
+    border-bottom: none;
+}
+
+/* Container de Sugestão de Preço */
+.suggestion-container {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #e9ecef; /* Cinza claro */
+    border-radius: 5px;
+    display: flex; /* Para alinhar label e input */
+    flex-wrap: wrap; /* Quebra linha se não couber */
+    align-items: center;
+}
+
+.suggestion-container label {
+    margin-right: 10px;
+    margin-bottom: 0.5rem; /* Espaço se quebrar linha */
+}
+
+.suggestion-container input[type="number"] {
+    width: 100px; /* Largura fixa, mas pode ser ajustada */
+    padding: 0.5em;
+}
+
+p strong { /* Para os labels de custo e preço */
+    color: #495057;
+}
+
+/* Rodapé */
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    background-color: #343a40;
+    color: #adb5bd; /* Cinza claro para texto do rodapé */
+    font-size: 0.9em;
+    margin-top: auto; /* Garante que o footer fique no final com flexbox no body */
+}
+
+
+/* --- MEDIA QUERIES PARA RESPONSIVIDADE --- */
+
+/* Telas Menores (Ex: Smartphones) - até 768px */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column; /* Empilha h1 e auth-container */
+        text-align: center;
+    }
+
+    header h1 {
+        margin-bottom: 1rem;
+    }
+
+    #auth-container {
+        margin-top: 0.5rem;
+        justify-content: center;
+        width: 100%;
+    }
+
+    nav#app-nav button {
+        display: block; /* Botões da navegação um abaixo do outro */
+        width: 90%;
+        margin: 0.5rem auto; /* Centraliza os botões */
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    section {
+        padding: 1rem;
+    }
+
+    h2 {
+        font-size: 1.4em;
+    }
+    h3 {
+        font-size: 1.2em;
+    }
+
+    form input[type="text"],
+    form input[type="number"],
+    form input[type="email"],
+    form textarea,
+    form select {
+        font-size: 0.95em; /* Leve redução para caber melhor */
+    }
+
+    /* Ajustes no formulário de ingredientes da receita */
+    .ingrediente-item-form {
+        display: flex;
+        flex-direction: column; /* Empilha os campos do ingrediente */
+    }
+    .ingrediente-item-form label,
+    .ingrediente-item-form input,
+    .ingrediente-item-form select,
+    .ingrediente-item-form .unidade-display-receita,
+    .ingrediente-item-form p {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    .ingrediente-item-form .remover-ingrediente-btn {
+        margin-left: 0; /* Remove margem quando empilhado */
+        margin-top: 0.5rem;
+        width: auto; /* Botão de remover com largura automática */
+        align-self: flex-start; /* Alinha à esquerda */
+    }
+
+    .suggestion-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .suggestion-container input[type="number"] {
+        width: 100%; /* Ocupa toda a largura */
+        margin-top: 0.3rem;
+    }
+}
+
+/* Telas muito pequenas (opcional, ajuste fino) - até 480px */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.5em;
+    }
+    #auth-container button {
+        padding: 0.5em 0.8em;
+        font-size: 0.9em;
+    }
+    nav#app-nav button {
+        padding: 0.6em 1em;
+        font-size: 0.9em;
+    }
+    main {
+        padding: 0.5rem;
+    }
+    section {
+        padding: 0.75rem;
+    }
+}
