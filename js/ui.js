@@ -58,10 +58,32 @@ export function renderRecipeList(recipes, onRecipeClickCallback) {
         receitasContainer.innerHTML = '<p>Nenhuma receita cadastrada ainda.</p>';
         return;
     }
-    recipes.forEach(recipe => {
+ recipes.forEach(recipe => {
         const item = document.createElement('div');
         item.classList.add('receita-item');
-        item.innerHTML = `<h3>${recipe.nome}</h3><p>Custo: R$ ${parseFloat(recipe.custoTotal || 0).toFixed(2)}</p>`;
+
+        // Preparar as strings de custo e preço de venda
+        const custoText = `Custo: R$ ${parseFloat(recipe.custoTotal || 0).toFixed(2)}`;
+        let precoVendaText = '';
+
+        // Verifica se os campos de margem e preço de venda existem na receita
+        // (para compatibilidade com receitas antigas)
+        if (typeof recipe.precoVendaSugerido !== 'undefined') {
+            precoVendaText = `Sugestão Venda: R$ ${parseFloat(recipe.precoVendaSugerido).toFixed(2)}`;
+            if (typeof recipe.margemLucro !== 'undefined') {
+                precoVendaText += ` (${recipe.margemLucro.toFixed(0)}%)`;
+            }
+        } else {
+            precoVendaText = 'Sugestão Venda: N/A';
+        }
+
+        item.innerHTML = `
+            <h3>${recipe.nome}</h3>
+            <p>${custoText}</p>
+            <p>${precoVendaText}</p>
+        `;
+        // Adicionamos um data attribute para fácil acesso ao ID se necessário no futuro
+        item.dataset.recipeId = recipe.id;
         item.addEventListener('click', () => onRecipeClickCallback(recipe.id));
         receitasContainer.appendChild(item);
     });
@@ -71,6 +93,7 @@ const detalheNome = document.getElementById('detalhe-receita-nome');
 const detalheIngredientes = document.getElementById('detalhe-receita-ingredientes');
 const detalheInstrucoes = document.getElementById('detalhe-receita-instrucoes');
 const detalheCusto = document.getElementById('detalhe-receita-custo');
+
 
 export function renderRecipeDetails(recipe) {
     detalheNome.textContent = recipe.nome;
@@ -231,12 +254,18 @@ export function getRecipeFormData() {
         alert("Por favor, preencha todos os campos da receita, incluindo pelo menos um ingrediente.");
         return null;
     }
-
+    // CAPTURANDO OS VALORES DOS ELEMENTOS ESPECIFICADOS:
+    // Pega o valor ATUAL do input com id "margem-lucro-percentual"
+    const margemLucroValor = parseFloat(margemLucroPercentualInput.value) || 0;
+    // Pega o valor ATUAL (textContent) do span com id "preco-venda-sugerido-preview"
+    const precoVendaValor = parseFloat(precoVendaSugeridoPreview.textContent) || 0;
     return {
         nome,
         instrucoes,
         ingredientes,
-        custoTotal: custoTotalCalculado
+        custoTotal: custoTotalCalculado,
+        margemLucro: margemLucroValor,          // Valor do input margem-lucro-percentual
+        precoVendaSugerido: precoVendaValor     // Valor do span preco-venda-sugerido-preview
     };
 }
 
