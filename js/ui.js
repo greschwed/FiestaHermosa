@@ -15,6 +15,12 @@ const listarReceitasSection = document.getElementById('listar-receitas-section')
 const detalheReceitaSection = document.getElementById('detalhe-receita-section');
 const cadastrarMaterialSection = document.getElementById('cadastrar-material-section');
 const cadastrarReceitaSection = document.getElementById('cadastrar-receita-section');
+const formReceitaTitulo = document.getElementById('form-receita-titulo');
+const formReceitaSubmitBtn = document.getElementById('form-receita-submit-btn');
+const cancelarEdicaoBtnUI = document.getElementById('cancelar-edicao-btn');
+// Campos do formulário que serão populados
+const receitaNomeInput = document.getElementById('receita-nome');
+const receitaInstrucoesInput = document.getElementById('receita-instrucoes');
 
 
 const sections = [listarReceitasSection, detalheReceitaSection, cadastrarMaterialSection, cadastrarReceitaSection];
@@ -69,12 +75,12 @@ export function renderRecipeList(recipes, onRecipeClickCallback) {
         // Verifica se os campos de margem e preço de venda existem na receita
         // (para compatibilidade com receitas antigas)
         if (typeof recipe.precoVendaSugerido !== 'undefined') {
-            precoVendaText = `Sugestão Venda: R$ ${parseFloat(recipe.precoVendaSugerido).toFixed(2)}`;
+            precoVendaText = `Preço de Venda sugerido: R$ ${parseFloat(recipe.precoVendaSugerido).toFixed(2)}`;
             if (typeof recipe.margemLucro !== 'undefined') {
                 precoVendaText += ` (${recipe.margemLucro.toFixed(0)}%)`;
             }
         } else {
-            precoVendaText = 'Sugestão Venda: N/A';
+            precoVendaText = 'Preço de Venda sugerido: Não calculado';
         }
 
         item.innerHTML = `
@@ -292,5 +298,62 @@ export function updateSalePricePreview() {
     } else {
         precoVendaSugeridoPreview.textContent = '0.00';
     }
+}
+export function setRecipeFormMode(mode, recipeId = null) {
+    if (mode === 'edit') {
+        formReceitaTitulo.textContent = 'Editar Receita';
+        formReceitaSubmitBtn.textContent = 'Atualizar Receita';
+        cancelarEdicaoBtnUI.style.display = 'inline-block';
+    } else { // 'create' mode
+        formReceitaTitulo.textContent = 'Cadastrar Nova Receita';
+        formReceitaSubmitBtn.textContent = 'Salvar Receita';
+        cancelarEdicaoBtnUI.style.display = 'none';
+        clearRecipeForm(); // Garante que o formulário está limpo para nova receita
+    }
+}
+
+export function populateRecipeFormForEdit(recipe) {
+    clearRecipeForm(); // Começa limpando para evitar resíduos
+
+    receitaNomeInput.value = recipe.nome || '';
+    receitaInstrucoesInput.value = recipe.instrucoes || '';
+    margemLucroPercentualInput.value = typeof recipe.margemLucro !== 'undefined' ? recipe.margemLucro : '100';
+
+    ingredientesReceitaContainer.innerHTML = ''; // Limpa campos de ingredientes existentes
+
+    if (recipe.ingredientes && Array.isArray(recipe.ingredientes)) {
+        recipe.ingredientes.forEach(ing => {
+            addIngredienteField(); // Adiciona um novo conjunto de campos de ingrediente
+            const lastIngredienteField = ingredientesReceitaContainer.lastElementChild;
+            if (lastIngredienteField) {
+                const materialSelect = lastIngredienteField.querySelector('.material-select');
+                const quantidadeInput = lastIngredienteField.querySelector('.quantidade-material');
+                const unidadeDisplay = lastIngredienteField.querySelector('.unidade-display-receita'); // Para atualizar
+                const custoPreview = lastIngredienteField.querySelector('.custo-ingrediente-preview'); // Para atualizar
+
+                if (materialSelect) materialSelect.value = ing.materialId;
+                if (quantidadeInput) quantidadeInput.value = ing.quantidade;
+
+                // Disparar manualmente a atualização da unidade e custo do ingrediente individual
+                // após definir os valores
+                if (materialSelect && quantidadeInput && custoPreview) {
+                    const selectedOption = materialSelect.options[materialSelect.selectedIndex];
+                    if (selectedOption && selectedOption.value) { // Garante que uma opção válida está selecionada
+                         unidadeDisplay.textContent = `(${selectedOption.dataset.unidade || ''})`;
+                         updateSingleIngredientCost(materialSelect, quantidadeInput, custoPreview);
+                    } else if (materialSelect.options.length > 0) { // Se não achou, mas há opções, tenta a primeira
+                        materialSelect.selectedIndex = 0; // ou uma opção placeholder
+                        // e chama updateSingleIngredientCost
+                    }
+                }
+            }
+        });
+    }
+    if (recipe.ingredientes.length === 0) { // Se a receita salva não tinha ingredientes
+        addIngredienteField();
+    }
+
+
+    updateRecipeCostPreview(); // Recalcula custo total e preço de venda com os dados carregados
 }
 

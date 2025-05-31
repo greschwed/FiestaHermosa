@@ -37,13 +37,16 @@
 
         <!-- Seção para Detalhes da Receita -->
         <section id="detalhe-receita-section" style="display:none;">
-            <h2 id="detalhe-receita-nome"></h2>
-            <h3>Ingredientes:</h3>
-            <ul id="detalhe-receita-ingredientes"></ul>
-            <h3>Modo de Preparo:</h3>
-            <p id="detalhe-receita-instrucoes"></p>
-            <p><strong>Custo Total Estimado: R$ <span id="detalhe-receita-custo"></span></strong></p>
-            <button id="voltar-para-lista-btn">Voltar para Lista</button>
+        <h2 id="detalhe-receita-nome"></h2>
+        <h3>Ingredientes:</h3>
+        <ul id="detalhe-receita-ingredientes"></ul>
+        <h3>Modo de Preparo:</h3>
+        <p id="detalhe-receita-instrucoes"></p>
+        <p><strong>Custo Total Estimado: R$ <span id="detalhe-receita-custo"></span></strong></p>
+        <p><strong>Margem de Lucro Aplicada: <span id="detalhe-receita-margem"></span>%</strong></p>
+        <p><strong>Preço de Venda Sugerido na Criação: R$ <span id="detalhe-receita-preco-venda"></span></strong></p>
+        <button id="editar-receita-btn">Editar Receita</button> <!-- NOVO BOTÃO -->
+        <button id="voltar-para-lista-btn">Voltar para Lista</button>
         </section>
 
         <!-- Seção para Cadastro de Materiais -->
@@ -72,7 +75,7 @@
 
         <!-- Seção para Cadastro de Receitas -->
         <section id="cadastrar-receita-section" style="display:none;">
-            <h2>Cadastrar Nova Receita</h2>
+            <h2 id="form-receita-titulo">Cadastrar Nova Receita</h2> <!-- Título dinâmico -->
             <form id="form-cadastro-receita">
                 <div>
                     <label for="receita-nome">Nome da Receita:</label>
@@ -100,7 +103,9 @@
                 <p><strong>Preço de Venda Sugerido: R$ <span id="preco-venda-sugerido-preview">0.00</span></strong></p>
                 <!-- FIM DOS NOVOS CAMPOS -->
 
-                <button type="submit">Salvar Receita</button>
+                 <button type="submit" id="form-receita-submit-btn">Salvar Receita</button>
+                <button type="button" id="cancelar-edicao-btn" style="display:none; background-color: #6c757d;">Cancelar Edição</button> <!-- Botão de Cancelar Edição -->
+
             </form>
         </section>
     </main>

@@ -266,7 +266,34 @@ footer {
     font-size: 0.9em;
     margin-top: auto; /* Garante que o footer fique no final com flexbox no body */
 }
+#editar-receita-btn {
+    background-color: #ff7575; /* Amarelo warning */
+    color: #212529;
+    padding: 0.6em 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px; /* Espaço para o botão de voltar */
+    margin-top: 20px; /* respiro to texto de detalhes da receita */
+    transition: background-color 0.3s ease;
+}
+#editar-receita-btn:hover {
+    background-color: #e02200;
+}
+#voltar-para-lista-btn{
+    background-color: #c9d3ee; /* Amarelo warning */
+    color: #212529;
+    padding: 0.6em 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px; /* respiro to texto de detalhes da receita */
+    transition: background-color 0.3s ease;
+}
 
+#cancelar-edicao-btn {
+    margin-left: 10px;
+}
 
 /* --- MEDIA QUERIES PARA RESPONSIVIDADE --- */
 

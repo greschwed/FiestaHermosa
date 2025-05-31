@@ -82,3 +82,17 @@ export async function getRecipeById(recipeId) {
         throw error;
     }
 }
+export async function updateRecipe(recipeId, recipeData) {
+    try {
+        const recipeRef = db.collection("receitas").doc(recipeId);
+        await recipeRef.update({
+            ...recipeData, // Espalha os novos dados da receita
+            atualizadaEm: firebase.firestore.FieldValue.serverTimestamp() // Opcional: registrar quando foi atualizado
+        });
+        console.log("Receita atualizada com ID: ", recipeId);
+        return { id: recipeId, ...recipeData };
+    } catch (error) {
+        console.error("Erro ao atualizar receita: ", error);
+        throw error;
+    }
+}
