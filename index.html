@@ -23,7 +23,7 @@
     <nav id="app-nav" style="display:none;">
         <button id="nav-listar-receitas">Listar Receitas</button>
         <button id="nav-cadastrar-receita">Cadastrar Nova Receita</button>
-        <button id="nav-cadastrar-material">Cadastrar Material</button>
+        <button id="nav-cadastrar-material">Cadastrar Ingrediente</button>
     </nav>
 
     <main id="app-content" style="display:none;">
@@ -51,10 +51,10 @@
 
         <!-- Seção para Cadastro de Materiais -->
         <section id="cadastrar-material-section" style="display:none;">
-            <h2>Cadastrar Novo Material</h2>
+            <h2>Cadastrar Novo Ingrediente</h2>
             <form id="form-cadastro-material">
                 <div>
-                    <label for="material-nome">Nome do Material:</label>
+                    <label for="material-nome">Nome do Ingrediente:</label>
                     <input type="text" id="material-nome" required>
                 </div>
                 <div>
@@ -65,9 +65,9 @@
                     <label for="material-preco">Preço por Unidade (R$):</label>
                     <input type="number" step="0.01" id="material-preco" required>
                 </div>
-                <button type="submit">Salvar Material</button>
+                <button type="submit">Salvar Ingrediente</button>
             </form>
-            <h3>Materiais Cadastrados:</h3>
+            <h3>Ingredientes Cadastrados:</h3>
             <ul id="lista-materiais-cadastrados">
                 <!-- Materiais cadastrados serão listados aqui -->
             </ul>
