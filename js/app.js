@@ -101,6 +101,26 @@ logoutBtn.addEventListener('click', async () => {
         // Erro já tratado em auth.js
     }
 });
+formCadastroMaterial.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('material-nome').value;
+    const unidade = document.getElementById('material-unidade').value;
+    const precoPorUnidade = parseFloat(document.getElementById('material-preco').value);
+
+    if (nome && unidade && !isNaN(precoPorUnidade)) {
+        try {
+            await addMaterial({ nome, unidade, precoPorUnidade });
+            alert('Material cadastrado com sucesso!');
+            clearMaterialForm();
+            await loadAndRenderMaterials(); // Atualiza a lista
+        } catch (error) {
+            alert('Erro ao cadastrar material: ' + error.message);
+        }
+    } else {
+        alert('Por favor, preencha todos os campos corretamente.');
+    }
+});
+
 
 // Event Listeners de Navegação
 navListarReceitas.addEventListener('click', () => {
