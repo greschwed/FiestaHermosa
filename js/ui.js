@@ -382,7 +382,7 @@ if (selectedOption && selectedOption.value && typeof selectedOption.dataset.prec
     } else {
         // Caso "Selecione um material" ou opção sem data-preco
         custoPreviewEl.textContent = "0.00"; // APENAS O NÚMERO
-    }
+    }   
 }
 
 export function updateRecipeCostPreview() {
@@ -436,13 +436,13 @@ export function getRecipeFormData() {
     const margemLucroValor = parseFloat(margemLucroPercentualInput.value) || 0;
     // Pega o valor ATUAL (textContent) do span com id "preco-venda-sugerido-preview"
     const precoVendaValor = parseFloat(precoVendaSugeridoPreview.textContent) || 0;
-    return {
+   return {
         nome,
         instrucoes,
         ingredientes,
         custoTotal: custoTotalCalculado,
-        margemLucro: margemLucroValor,          // Valor do input margem-lucro-percentual
-        precoVendaSugerido: precoVendaValor     // Valor do span preco-venda-sugerido-preview
+        margemLucro: margemLucroValor,
+        precoVendaSugerido: precoVendaCalculado // Use o valor recalculado
     };
 }
 
