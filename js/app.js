@@ -144,7 +144,7 @@ formCadastroMaterial.addEventListener('submit', async (e) => {
             } else {
                 // Modo de Criação
                 await addMaterial(materialData);
-                alert('Material cadastrado com sucesso!');
+                console.log('Material cadastrado com sucesso!');
             }
             currentEditingMaterialId = null; // Reseta modo de edição
             setMaterialFormMode('create');   // Reseta o formulário visualmente

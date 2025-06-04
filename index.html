@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Produtos e Receitas de Bolo</title>
+    <title>Gerenciador de Receitas</title>
     <link rel="stylesheet" href="css/style.css">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -12,7 +12,7 @@
 </head>
 <body>
     <header>
-        <h1>Gerenciador de Receitas de Bolo</h1>
+        <h1>Gerenciador de Receitas</h1>
         <div id="auth-container">
             <button id="login-google-btn">Login com Google</button>
             <p id="user-info" style="display:none;"></p>
@@ -51,26 +51,58 @@
 
         <!-- Seção para Cadastro de Materiais -->
         <section id="cadastrar-material-section" style="display:none;">
-    <h2 id="form-material-titulo">Cadastrar Novo Material</h2> <!-- Título dinâmico -->
+    <h2 id="form-material-titulo">Cadastrar Novo Ingrediente </h2>
     <form id="form-cadastro-material">
         <div>
-            <label for="material-nome">Nome do Material:</label>
+            <label for="material-nome">Nome do Ingrediente:</label>
             <input type="text" id="material-nome" required>
         </div>
-        <div>
-            <label for="material-unidade">Unidade (ex: kg, L, un):</label>
-            <input type="text" id="material-unidade" required>
-        </div>
-        <div>
-            <label for="material-preco">Preço por Unidade (R$):</label>
-            <input type="number" step="0.01" id="material-preco" required>
-        </div>
-        <button type="submit" id="form-material-submit-btn">Salvar Material</button>
+
+        <fieldset>
+            <legend>Informações de Compra</legend>
+            <div>
+                <label for="material-preco-compra">Preço Total da Compra (R$):</label>
+                <input type="number" step="0.01" id="material-preco-compra" required>
+            </div>
+            <div>
+                <label for="material-qtd-compra">Quantidade Comprada:</label>
+                <input type="number" step="any" id="material-qtd-compra" required>
+            </div>
+            <div>
+                <label for="material-unidade-compra">Unidade da Compra:</label>
+                <select id="material-unidade-compra" required>
+                    <option value="">Selecione</option>
+                    <option value="un">Unidade (un)</option> <!-- Para itens como ovos, etc. -->
+                    <option value="kg">Quilograma (kg)</option>
+                    <option value="g">Grama (g)</option>
+                    <option value="L">Litro (L)</option>
+                    <option value="ml">Mililitro (ml)</option>
+                </select>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Uso na Receita</legend>
+            <div>
+                <label for="material-unidade-receita">Menor Unidade Usada na Receita:</label>
+                <select id="material-unidade-receita" required>
+                    <option value="">Selecione</option>
+                    <option value="g">Grama (g)</option>
+                    <option value="ml">Mililitro (ml)</option>
+                    <option value="un">Unidade (un)</option> <!-- Para itens como ovos, etc. -->
+                </select>
+            </div>
+        </fieldset>
+        <p>
+            <strong>Custo por Unidade de Receita (calculado): R$ <span id="custo-calculado-preview">---</span></strong>
+        </p>
+
+        <button type="submit" id="form-material-submit-btn">Salvar Ingrediente</button>
         <button type="button" id="cancelar-edicao-material-btn" style="display:none; background-color: #6c757d;">Cancelar Edição</button>
     </form>
     <h3>Materiais Cadastrados:</h3>
     <ul id="lista-materiais-cadastrados">
-        <!-- Materiais cadastrados serão listados aqui com botões de editar/excluir -->
+        <!-- Materiais cadastrados serão listados aqui -->
     </ul>
 </section>
 
@@ -106,13 +138,13 @@
 
                  <button type="submit" id="form-receita-submit-btn">Salvar Receita</button>
                 <button type="button" id="cancelar-edicao-btn" style="display:none; background-color: #6c757d;">Cancelar Edição</button> <!-- Botão de Cancelar Edição -->
-
+            
             </form>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2025 Gerenciador de Receitas</p>
+        <p>&copy; 2025 Fiesta Hermosa - Gerenciador de Receitas </p>
     </footer>
 
     <script type="module" src="js/app.js"></script>
