@@ -31,6 +31,41 @@ export async function getMaterials() {
     }
 }
 
+export async function updateMaterial(materialId, materialData) {
+    try {
+        const materialRef = db.collection("materiais").doc(materialId);
+        // Certifique-se de que materialData contenha apenas os campos que você quer atualizar
+        // por exemplo: nome, unidade, preco
+        const dataToUpdate = {
+            nome: materialData.nome,
+            unidade: materialData.unidade,
+            preco: parseFloat(materialData.preco), // Garante que o preço é número
+            atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() // Opcional
+        };
+        await materialRef.update(dataToUpdate);
+        console.log("Material atualizado com ID: ", materialId);
+        return { id: materialId, ...dataToUpdate };
+    } catch (error) {
+        console.error("Erro ao atualizar material: ", error);
+        throw error;
+    }
+}
+
+export async function getMaterialById(materialId) {
+    try {
+        const doc = await db.collection("materiais").doc(materialId).get();
+        if (doc.exists) {
+            return { id: doc.id, ...doc.data() };
+        } else {
+            console.log("Nenhum material encontrado com o ID:", materialId);
+            return null;
+        }
+    } catch (error) {
+        console.error("Erro ao buscar material por ID:", error);
+        throw error;
+    }
+}
+
 // --- Serviços de Receitas ---
 export async function addRecipe(recipeData) {
     try {

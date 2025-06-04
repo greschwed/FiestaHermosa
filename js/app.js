@@ -1,12 +1,17 @@
 // js/app.js
 import { firebaseConfig } from './config.js';
 import { initAuth, signInWithGoogle, signOutUser, getCurrentUser } from './auth.js';
-import { initFirestore, addMaterial, getMaterials, addRecipe, getRecipes, getRecipeById,updateRecipe } from './firestoreService.js';
+import {
+    initFirestore, addMaterial, getMaterials, getMaterialById, updateMaterial, // Adicionar getMaterialById e updateMaterial
+    addRecipe, getRecipes, getRecipeById, updateRecipe
+} from './firestoreService.js';
 import {
     updateLoginUI, showSection,
     renderRecipeList, renderRecipeDetails,
     renderMaterialsList, setupRecipeForm, addIngredienteField, getRecipeFormData, clearRecipeForm, clearMaterialForm,
-    setRecipeFormMode, populateRecipeFormForEdit
+    setRecipeFormMode, populateRecipeFormForEdit,allMaterialsCache,
+    setMaterialFormMode, populateMaterialFormForEdit, getMaterialFormData, // Adicionar funções de UI para material
+    setOnEditMaterialCallback // Adicionar para callback de edição de material
 } from './ui.js';
 
 // Inicializa Firebase
@@ -17,6 +22,7 @@ initFirestore(app);
 // Variável para rastrear o ID da receita em edição
 let currentEditingRecipeId = null;
 let currentViewingRecipeId = null; // Para saber qual receita estava sendo vista antes de editar
+let currentEditingMaterialId = null; // <<<< NOVA VARIÁVEL para material
 
 // Elementos do DOM e Event Listeners de Navegação e Ações
 const loginBtn = document.getElementById('login-google-btn');
@@ -83,6 +89,30 @@ async function handleRecipeClick(recipeId) {
     }
 }
 
+async function handleEditMaterialClick(materialId) {
+    currentEditingMaterialId = materialId;
+    console.log("Editando material ID:", materialId);
+    try {
+        // Poderia usar getMaterialById se a lista não tiver todos os dados,
+        // mas allMaterialsCache em ui.js deve ter os dados se a lista foi renderizada.
+        // Vamos buscar do cache para simplificar, assumindo que renderMaterialsList atualizou allMaterialsCache
+        const materialToEdit = allMaterialsCache.find(m => m.id === materialId);
+
+        if (materialToEdit) {
+            setMaterialFormMode('edit');
+            populateMaterialFormForEdit(materialToEdit);
+            showSection('cadastrar-material-section'); // Garante que a seção está visível
+        } else {
+            alert("Material não encontrado para edição.");
+            currentEditingMaterialId = null;
+        }
+    } catch (error) {
+        console.error("Erro ao preparar para editar material:", error);
+        alert("Erro ao carregar dados do material para edição.");
+        currentEditingMaterialId = null;
+    }
+}
+
 // Event Listeners de Autenticação
 loginBtn.addEventListener('click', async () => {
     try {
@@ -103,21 +133,31 @@ logoutBtn.addEventListener('click', async () => {
 });
 formCadastroMaterial.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const nome = document.getElementById('material-nome').value;
-    const unidade = document.getElementById('material-unidade').value;
-    const precoPorUnidade = parseFloat(document.getElementById('material-preco').value);
+    const materialData = getMaterialFormData();
 
-    if (nome && unidade && !isNaN(precoPorUnidade)) {
+    if (materialData) {
         try {
-            await addMaterial({ nome, unidade, precoPorUnidade });
-            alert('Material cadastrado com sucesso!');
-            clearMaterialForm();
-            await loadAndRenderMaterials(); // Atualiza a lista
+            if (currentEditingMaterialId) {
+                // Modo de Edição
+                await updateMaterial(currentEditingMaterialId, materialData);
+                alert('Material atualizado com sucesso!');
+            } else {
+                // Modo de Criação
+                await addMaterial(materialData);
+                alert('Material cadastrado com sucesso!');
+            }
+            currentEditingMaterialId = null; // Reseta modo de edição
+            setMaterialFormMode('create');   // Reseta o formulário visualmente
+            // clearMaterialForm(); // Já chamado por setMaterialFormMode('create')
+            await loadAndRenderMaterials();  // Atualiza a lista de materiais na UI
+            // Opcional: Recarregar materiais nos formulários de receita
+            // Se a mudança de um material afeta receitas já em edição,
+            // seria necessário atualizar os selects no form de receita,
+            // mas isso adiciona complexidade. Por ora, só atualiza a lista de materiais.
         } catch (error) {
-            alert('Erro ao cadastrar material: ' + error.message);
+            console.error("Erro ao salvar material:", error);
+            alert("Erro ao salvar material: " + error.message);
         }
-    } else {
-        alert('Por favor, preencha todos os campos corretamente.');
     }
 });
 
@@ -142,8 +182,10 @@ navCadastrarReceita.addEventListener('click', async () => {
 });
 
 navCadastrarMaterial.addEventListener('click', async () => {
+    currentEditingMaterialId = null; // Garante modo de criação
+    setMaterialFormMode('create');
     await loadAndRenderMaterials(); // Atualiza a lista de materiais já cadastrados
-    clearMaterialForm();
+    // clearMaterialForm(); // setMaterialFormMode('create') já chama clearMaterialForm
     showSection('cadastrar-material-section');
 });
 
@@ -240,7 +282,15 @@ addIngredienteBtn.addEventListener('click', addIngredienteField);
 
 // Código de inicialização (se necessário, mas a maior parte é orientada a eventos)
 document.addEventListener('DOMContentLoaded', () => {
-    // A inicialização do Firebase e auth já acontece no topo do script.
-    // UI inicial é controlada por onAuthStateChanged.
+    setOnEditMaterialCallback(handleEditMaterialClick); // <<<< CONFIGURA O CALLBACK
     console.log("Aplicação pronta.");
 });
+
+const cancelarEdicaoMaterialBtnApp = document.getElementById('cancelar-edicao-material-btn');
+if(cancelarEdicaoMaterialBtnApp) { // Verifica se o botão existe
+    cancelarEdicaoMaterialBtnApp.addEventListener('click', () => {
+        currentEditingMaterialId = null;
+        setMaterialFormMode('create'); // Reseta o formulário
+        // Não precisa redirecionar, já está na tela de cadastro de material
+    });
+}

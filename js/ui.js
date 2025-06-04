@@ -1,7 +1,7 @@
 // js/ui.js
 import { getMaterials } from './firestoreService.js';
 
-let allMaterialsCache = []; // Cache para os materiais disponíveis
+export let allMaterialsCache = []; // Cache para os materiais disponíveis
 
 // Elementos do DOM
 const loginBtn = document.getElementById('login-google-btn');
@@ -21,9 +21,57 @@ const cancelarEdicaoBtnUI = document.getElementById('cancelar-edicao-btn');
 // Campos do formulário que serão populados
 const receitaNomeInput = document.getElementById('receita-nome');
 const receitaInstrucoesInput = document.getElementById('receita-instrucoes');
-
+const formMaterialTitulo = document.getElementById('form-material-titulo');
+const formMaterialSubmitBtn = document.getElementById('form-material-submit-btn');
+const cancelarEdicaoMaterialBtnUI = document.getElementById('cancelar-edicao-material-btn');
+const materialNomeInput = document.getElementById('material-nome');
+const materialUnidadeInput = document.getElementById('material-unidade');
+const materialPrecoInput = document.getElementById('material-preco');
+const listaMateriaisCadastradosUI = document.getElementById('lista-materiais-cadastrados');
 
 const sections = [listarReceitasSection, detalheReceitaSection, cadastrarMaterialSection, cadastrarReceitaSection];
+let onEditMaterialCallback = null;
+
+export function setOnEditMaterialCallback(callback) {
+    onEditMaterialCallback = callback;
+}
+
+
+
+export function setMaterialFormMode(mode) {
+    if (mode === 'edit') {
+        formMaterialTitulo.textContent = 'Editar Material';
+        formMaterialSubmitBtn.textContent = 'Atualizar Material';
+        cancelarEdicaoMaterialBtnUI.style.display = 'inline-block';
+    } else { // 'create'
+        formMaterialTitulo.textContent = 'Cadastrar Novo Material';
+        formMaterialSubmitBtn.textContent = 'Salvar Material';
+        cancelarEdicaoMaterialBtnUI.style.display = 'none';
+        clearMaterialForm();
+    }
+}
+
+export function populateMaterialFormForEdit(material) {
+    materialNomeInput.value = material.nome || '';
+    materialUnidadeInput.value = material.unidade || '';
+    materialPrecoInput.value = parseFloat(material.preco || 0).toFixed(2);
+
+    if (materialNomeInput) { // Boa prática verificar se o elemento existe
+        materialNomeInput.focus();
+    }
+}
+
+export function getMaterialFormData() {
+    const nome = materialNomeInput.value.trim();
+    const unidade = materialUnidadeInput.value.trim();
+    const preco = parseFloat(materialPrecoInput.value);
+
+    if (!nome || !unidade || isNaN(preco) || preco <= 0) {
+        alert("Por favor, preencha todos os campos do material corretamente.");
+        return null;
+    }
+    return { nome, unidade, preco };
+}
 
 function hideAllSections() {
     sections.forEach(section => section.style.display = 'none');
@@ -118,18 +166,33 @@ export function renderRecipeDetails(recipe) {
 
 // --- UI para Cadastro de Materiais ---
 const listaMateriaisCadastradosEl = document.getElementById('lista-materiais-cadastrados');
+
 export function renderMaterialsList(materials) {
-    allMaterialsCache = materials; // Atualiza o cache
-    listaMateriaisCadastradosEl.innerHTML = '';
-    if (materials.length === 0) {
-        listaMateriaisCadastradosEl.innerHTML = '<li>Nenhum material cadastrado.</li>';
+    allMaterialsCache = materials; // Atualiza o cache global
+    listaMateriaisCadastradosUI.innerHTML = '';
+
+    if (!materials || materials.length === 0) {
+        listaMateriaisCadastradosUI.innerHTML = '<li>Nenhum material cadastrado.</li>';
         return;
     }
-    materials.forEach(mat => {
+
+    materials.forEach(material => {
         const li = document.createElement('li');
-        li.textContent = `${mat.nome} (${mat.unidade}) - R$ ${parseFloat(mat.precoPorUnidade).toFixed(2)}`;
-        // Poderia adicionar botões de editar/excluir aqui
-        listaMateriaisCadastradosEl.appendChild(li);
+        li.innerHTML = `
+            <span class="material-info">${material.nome} (${material.unidade}) - R$ ${parseFloat(material.preco || 0).toFixed(2)}</span>
+            <div class="material-actions">
+                <button class="edit-material-btn" data-id="${material.id}">Editar</button>
+                <!-- Poderia adicionar um botão de excluir aqui no futuro -->
+            </div>
+        `;
+        // Adiciona listener para o botão de editar
+        const editBtn = li.querySelector('.edit-material-btn');
+        if (editBtn && onEditMaterialCallback) {
+            editBtn.addEventListener('click', () => {
+                onEditMaterialCallback(material.id); // Passa o ID do material para o app.js
+            });
+        }
+        listaMateriaisCadastradosUI.appendChild(li);
     });
 }
 
