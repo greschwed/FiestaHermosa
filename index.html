@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Receitas</title>
+    <title>Fiesta Hermosa - Gerenciador de Receitas</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome (para ícones) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- CSS Personalizado -->
     <link rel="stylesheet" href="css/style.css">
+    
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -12,139 +23,157 @@
 </head>
 <body>
     <header>
-        <h1>Gerenciador de Receitas</h1>
-        <div id="auth-container">
-            <button id="login-google-btn">Login com Google</button>
-            <p id="user-info" style="display:none;"></p>
-            <button id="logout-btn" style="display:none;">Logout</button><br>
+        <div class="container">
+            <h1>Fiesta Hermosa</h1>
+            <div id="auth-container">
+                <p id="user-info" style="display:none;"></p>
+                <button id="login-google-btn"><i class="fab fa-google"></i> Login com Google</button>
+                <button id="logout-btn" style="display:none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
         </div>
     </header>
 
     <nav id="app-nav" style="display:none;">
-        <button id="nav-listar-receitas">Listar Receitas</button>
-        <button id="nav-cadastrar-receita">Cadastrar Nova Receita</button>
-        <button id="nav-cadastrar-material">Cadastrar Ingrediente</button>
+        <div class="container">
+            <button id="nav-listar-receitas"><i class="fas fa-book-open"></i> Minhas Receitas</button>
+            <button id="nav-cadastrar-receita"><i class="fas fa-plus"></i> Nova Receita</button>
+            <button id="nav-cadastrar-material"><i class="fas fa-shopping-basket"></i> Ingredientes</button>
+        </div>
     </nav>
 
-    <main id="app-content" style="display:none;">
+    <main id="app-content" class="container" style="display:none;">
         <!-- Seção para Listar Receitas -->
         <section id="listar-receitas-section">
-            <h2>Minhas Receitas</h2>
+            <h2><i class="fas fa-ice-cream"></i> Minhas Receitas</h2>
             <div id="receitas-container">
-                <!-- As receitas serão listadas aqui -->
+                <!-- As receitas serão listadas aqui dinamicamente -->
             </div>
         </section>
 
         <!-- Seção para Detalhes da Receita -->
         <section id="detalhe-receita-section" style="display:none;">
-        <h2 id="detalhe-receita-nome"></h2>
-        <h3>Ingredientes:</h3>
-        <ul id="detalhe-receita-ingredientes"></ul>
-        <h3>Modo de Preparo:</h3>
-        <p id="detalhe-receita-instrucoes"></p>
-        <p><strong>Custo Total Estimado: R$ <span id="detalhe-receita-custo"></span></strong></p>
-        <p><strong>Margem de Lucro Aplicada: <span id="detalhe-receita-margem"></span>%</strong></p>
-        <p><strong>Preço de Venda Sugerido na Criação: R$ <span id="detalhe-receita-preco-venda"></span></strong></p>
-        <button id="editar-receita-btn">Editar Receita</button> <!-- NOVO BOTÃO -->
-        <button id="voltar-para-lista-btn">Voltar para Lista</button>
+            <h2 id="detalhe-receita-nome"></h2>
+            <h3><i class="fas fa-list-ul"></i> Ingredientes:</h3>
+            <ul id="detalhe-receita-ingredientes"></ul>
+            <h3><i class="fas fa-utensils"></i> Modo de Preparo:</h3>
+            <p id="detalhe-receita-instrucoes"></p>
+            <div class="cost-details">
+                <p><strong><i class="fas fa-dollar-sign"></i> Custo Total Estimado:</strong> R$ <span id="detalhe-receita-custo"></span></p>
+                <p><strong><i class="fas fa-percentage"></i> Margem de Lucro:</strong> <span id="detalhe-receita-margem"></span>%</p>
+                <p><strong><i class="fas fa-cash-register"></i> Preço de Venda Sugerido:</strong> R$ <span id="detalhe-receita-preco-venda"></span></p>
+            </div>
+            <div class="action-buttons">
+                <button id="editar-receita-btn" class="btn-primary"><i class="fas fa-edit"></i> Editar Receita</button>
+                <button id="voltar-para-lista-btn" class="btn-secondary"><i class="fas fa-arrow-left"></i> Voltar para Lista</button>
+            </div>
         </section>
 
         <!-- Seção para Cadastro de Materiais -->
         <section id="cadastrar-material-section" style="display:none;">
-    <h2 id="form-material-titulo">Cadastrar Novo Ingrediente </h2>
-    <form id="form-cadastro-material">
-        <div>
-            <label for="material-nome">Nome do Ingrediente:</label>
-            <input type="text" id="material-nome" required>
-        </div>
+            <h2 id="form-material-titulo"><i class="fas fa-plus-circle"></i> Cadastrar Novo Ingrediente</h2>
+            <form id="form-cadastro-material">
+                <div>
+                    <label for="material-nome">Nome do Ingrediente:</label>
+                    <input type="text" id="material-nome" required placeholder="Ex: Farinha de Trigo">
+                </div>
 
-        <fieldset>
-            <legend>Informações de Compra</legend>
-            <div>
-                <label for="material-preco-compra">Preço Total da Compra (R$):</label>
-                <input type="number" step="0.01" id="material-preco-compra" required>
-            </div>
-            <div>
-                <label for="material-qtd-compra">Quantidade Comprada:</label>
-                <input type="number" step="any" id="material-qtd-compra" required>
-            </div>
-            <div>
-                <label for="material-unidade-compra">Unidade da Compra:</label>
-                <select id="material-unidade-compra" required>
-                    <option value="">Selecione</option>
-                    <option value="un">Unidade (un)</option> <!-- Para itens como ovos, etc. -->
-                    <option value="kg">Quilograma (kg)</option>
-                    <option value="g">Grama (g)</option>
-                    <option value="L">Litro (L)</option>
-                    <option value="ml">Mililitro (ml)</option>
-                </select>
-            </div>
-        </fieldset>
+                <fieldset>
+                    <legend>Informações de Compra</legend>
+                    <div class="form-grid">
+                        <div>
+                            <label for="material-preco-compra">Preço Total (R$):</label>
+                            <input type="number" step="0.01" id="material-preco-compra" required placeholder="20.50">
+                        </div>
+                        <div>
+                            <label for="material-qtd-compra">Quantidade Comprada:</label>
+                            <input type="number" step="any" id="material-qtd-compra" required placeholder="5">
+                        </div>
+                        <div>
+                            <label for="material-unidade-compra">Unidade da Compra:</label>
+                            <select id="material-unidade-compra" required>
+                                <option value="">Selecione</option>
+                                <option value="un">Unidade (un)</option>
+                                <option value="kg">Quilograma (kg)</option>
+                                <option value="g">Grama (g)</option>
+                                <option value="L">Litro (L)</option>
+                                <option value="ml">Mililitro (ml)</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="material-unidade-receita">Uso na Receita:</label>
+                            <select id="material-unidade-receita" required>
+                                <option value="">Selecione</option>
+                                <option value="g">Grama (g)</option>
+                                <option value="ml">Mililitro (ml)</option>
+                                <option value="un">Unidade (un)</option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+                
+                <p class="cost-preview">
+                    <strong>Custo por Unidade de Receita:</strong> R$ <span id="custo-calculado-preview">---</span>
+                </p>
 
-        <fieldset>
-            <legend>Uso na Receita</legend>
-            <div>
-                <label for="material-unidade-receita">Menor Unidade Usada na Receita:</label>
-                <select id="material-unidade-receita" required>
-                    <option value="">Selecione</option>
-                    <option value="g">Grama (g)</option>
-                    <option value="ml">Mililitro (ml)</option>
-                    <option value="un">Unidade (un)</option> <!-- Para itens como ovos, etc. -->
-                </select>
+                <div class="action-buttons">
+                    <button type="submit" id="form-material-submit-btn" class="btn-primary"><i class="fas fa-save"></i> Salvar Ingrediente</button>
+                    <button type="button" id="cancelar-edicao-material-btn" class="btn-secondary" style="display:none;"><i class="fas fa-times"></i> Cancelar Edição</button>
+                </div>
+            </form>
+            <div class="list-wrapper">
+                <h3><i class="fas fa-clipboard-list"></i> Ingredientes Cadastrados:</h3>
+                <ul id="lista-materiais-cadastrados">
+                    <!-- Materiais cadastrados serão listados aqui -->
+                </ul>
             </div>
-        </fieldset>
-        <p>
-            <strong>Custo por Unidade de Receita (calculado): R$ <span id="custo-calculado-preview">---</span></strong>
-        </p>
-
-        <button type="submit" id="form-material-submit-btn">Salvar Ingrediente</button>
-        <button type="button" id="cancelar-edicao-material-btn" style="display:none; background-color: #6c757d;">Cancelar Edição</button>
-    </form>
-    <h3>Materiais Cadastrados:</h3>
-    <ul id="lista-materiais-cadastrados">
-        <!-- Materiais cadastrados serão listados aqui -->
-    </ul>
-</section>
+        </section>
 
         <!-- Seção para Cadastro de Receitas -->
         <section id="cadastrar-receita-section" style="display:none;">
-            <h2 id="form-receita-titulo">Cadastrar Nova Receita</h2> <!-- Título dinâmico -->
+            <h2 id="form-receita-titulo"><i class="fas fa-pen-fancy"></i> Cadastrar Nova Receita</h2>
             <form id="form-cadastro-receita">
                 <div>
                     <label for="receita-nome">Nome da Receita:</label>
-                    <input type="text" id="receita-nome" required>
+                    <input type="text" id="receita-nome" required placeholder="Ex: Bolo de Chocolate Fofinho">
                 </div>
 
-                <h3>Ingredientes da Receita:</h3>
+                <h3><i class="fas fa-blender"></i> Ingredientes da Receita:</h3>
                 <div id="ingredientes-receita-container">
-                    <!-- Inputs dinâmicos para ingredientes serão adicionados aqui -->
+                    <!-- Inputs dinâmicos para ingredientes -->
                 </div>
-                <button type="button" id="add-ingrediente-btn">Adicionar Ingrediente</button>
+                <button type="button" id="add-ingrediente-btn" class="btn-add"><i class="fas fa-plus"></i> Adicionar Ingrediente</button>
 
                 <div>
                     <label for="receita-instrucoes">Modo de Preparo:</label>
-                    <textarea id="receita-instrucoes" rows="6" required></textarea>
+                    <textarea id="receita-instrucoes" rows="6" required placeholder="Descreva o passo a passo da receita..."></textarea>
                 </div>
+                
+                <fieldset>
+                    <legend>Custo e Preço de Venda</legend>
+                    <p class="cost-preview"><strong>Custo Total Estimado da Receita:</strong> R$ <span id="custo-total-receita-preview">0.00</span></p>
+                    <div class="form-grid">
+                        <div>
+                            <label for="margem-lucro-percentual">Margem de Lucro (%):</label>
+                            <input type="number" id="margem-lucro-percentual" value="100" step="1" min="0">
+                        </div>
+                        <div>
+                            <p class="cost-preview"><strong>Preço de Venda Sugerido:</strong> R$ <span id="preco-venda-sugerido-preview">0.00</span></p>
+                        </div>
+                    </div>
+                </fieldset>
 
-                <p><strong>Custo Total Estimado da Receita: R$ <span id="custo-total-receita-preview">0.00</span></strong></p>
-
-                <!-- NOVOS CAMPOS ADICIONADOS AQUI -->
-                <div class="suggestion-container">
-                    <label for="margem-lucro-percentual">Margem de Lucro Desejada (%):</label>
-                    <input type="number" id="margem-lucro-percentual" value="100" step="1" min="0">
+                <div class="action-buttons">
+                    <button type="submit" id="form-receita-submit-btn" class="btn-primary"><i class="fas fa-save"></i> Salvar Receita</button>
+                    <button type="button" id="cancelar-edicao-btn" class="btn-secondary" style="display:none;"><i class="fas fa-times"></i> Cancelar Edição</button>
                 </div>
-                <p><strong>Preço de Venda Sugerido: R$ <span id="preco-venda-sugerido-preview">0.00</span></strong></p>
-                <!-- FIM DOS NOVOS CAMPOS -->
-
-                 <button type="submit" id="form-receita-submit-btn">Salvar Receita</button>
-                <button type="button" id="cancelar-edicao-btn" style="display:none; background-color: #6c757d;">Cancelar Edição</button> <!-- Botão de Cancelar Edição -->
-            
             </form>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2025 Fiesta Hermosa - Gerenciador de Receitas </p>
+        <div class="container">
+            <p>&copy; 2025 Fiesta Hermosa. Todos os direitos reservados.</p>
+        </div>
     </footer>
 
     <script type="module" src="js/app.js"></script>

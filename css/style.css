@@ -1,5 +1,28 @@
 /* css/style.css */
 
+/* === PALETA DE CORES PASTEL & FONTES === */
+:root {
+    --background-light: #FEFBF9;
+    --text-primary: #4E342E;
+    --text-secondary: #795548;
+    --primary-color: #FFAB91; /* Coral pastel */
+    --primary-hover: #FF8A65;
+    --secondary-color: #DCE775; /* Lima pastel */
+    --accent-color: #A5D6A7; /* Verde pastel */
+    --accent-hover: #81C784;
+    --card-background: #FFFFFF;
+    --border-color: #E0E0E0;
+    --header-background: linear-gradient(135deg, #A1887F, #795548);
+    --header-text: #FFFFFF;
+    --footer-background: #4E342E;
+    --footer-text: #EFEBE9;
+    --danger-color: #EF9A9A;
+    --danger-hover: #E57373;
+    
+    --font-headings: 'Playfair Display', serif;
+    --font-body: 'Montserrat', sans-serif;
+}
+
 /* === GERAL & RESET BÁSICO === */
 * {
     box-sizing: border-box;
@@ -7,44 +30,62 @@
     padding: 0;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    background-color: #f4f7f6; /* Um cinza bem claro para o fundo geral */
-    color: #333;
-    margin: 0;
-    padding-bottom: 60px; /* Espaço para o footer não sobrepor conteúdo */
+html {
+    scroll-behavior: smooth;
 }
 
-.container { /* Pode usar para envolver o conteúdo principal se desejar */
+body {
+    font-family: var(--font-body);
+    line-height: 1.7;
+    background-color: var(--background-light);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
     max-width: 1100px;
-    margin: auto;
-    overflow: auto;
+    margin: 0 auto;
     padding: 0 20px;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    margin-bottom: 0.75em;
-    color: #2c3e50; /* Um azul escuro para títulos */
+main#app-content {
+    flex-grow: 1; /* Faz o main ocupar o espaço disponível */
+}
+
+h1, h2, h3 {
+    font-family: var(--font-headings);
+    color: var(--text-primary);
+    font-weight: 700;
 }
 
 h1 {
     font-size: 2.2em;
-    text-align: center;
 }
 
 h2 {
-    font-size: 1.8em;
+    font-size: 2em;
     text-align: center;
-    margin-top: 1.5em;
-    margin-bottom: 1em;
-    color: #34495e; /* Um pouco mais claro que h1 */
+    margin: 1.5em 0 1em 0;
+}
+
+h2 i {
+    margin-right: 10px;
+    color: var(--primary-color);
 }
 
 h3 {
     font-size: 1.4em;
-    color: #34495e;
+    color: var(--text-secondary);
     margin-bottom: 0.8em;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #E0E0E0;
+}
+
+h3 i {
+    margin-right: 8px;
 }
 
 p {
@@ -55,28 +96,25 @@ ul {
     list-style: none;
 }
 
-a {
-    text-decoration: none;
-    color: #007bff;
-}
-a:hover {
-    color: #0056b3;
-}
-
 /* === HEADER & AUTENTICAÇÃO === */
 header {
-    background-color: #34495e; /* Azul escuro para o header */
-    color: #fff;
-    padding: 1em 2em;
+    background: var(--header-background);
+    color: var(--header-text);
+    padding: 1.5em 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 header h1 {
-    font-size: 1.8em;
-    color: #fff;
+    color: var(--header-text);
     margin: 0;
 }
 
@@ -93,46 +131,137 @@ header h1 {
 
 /* === NAVEGAÇÃO PRINCIPAL === */
 #app-nav {
-    background-color: #ecf0f1; /* Cinza claro para a navegação */
+    background-color: #fff;
     padding: 1em 0;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-bottom: 1px solid var(--border-color);
 }
 
-#app-nav button {
-    margin: 0 10px;
+#app-nav .container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
 /* === ESTILOS GERAIS PARA SEÇÕES DE CONTEÚDO === */
 main#app-content section {
-    max-width: 800px;
-    margin: 30px auto;
     padding: 25px 30px;
-    background-color: #fff; /* Fundo branco para as seções */
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: var(--card-background);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+    border: 1px solid var(--border-color);
+    margin-top: 30px;
 }
 
-/* === FORMULÁRIOS (ESTILOS COMUNS E ESPECÍFICOS) === */
+/* === BOTÕES === */
+button, .button-style {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: 600;
+    font-family: var(--font-body);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+button:hover, .button-style:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+#app-nav button {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+#app-nav button:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+#login-google-btn, #logout-btn {
+    background-color: #fff;
+    color: var(--text-secondary);
+}
+#login-google-btn:hover, #logout-btn:hover {
+    background-color: var(--background-light);
+}
+
+button.btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+button.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+button.btn-secondary {
+    background-color: #B0BEC5;
+    color: #fff;
+}
+button.btn-secondary:hover {
+    background-color: #90A4AE;
+}
+
+button.btn-add {
+    background-color: var(--accent-color);
+    color: #fff;
+    width: 100%;
+    margin: 10px 0;
+}
+button.btn-add:hover {
+    background-color: var(--accent-hover);
+}
+
+.remover-ingrediente-btn {
+    background-color: transparent;
+    color: var(--danger-color);
+    padding: 6px 12px;
+    font-size: 0.9em;
+    border: none;
+    box-shadow: none;
+}
+.remover-ingrediente-btn:hover {
+    color: #fff;
+    background-color: var(--danger-hover);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* === FORMULÁRIOS === */
 form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
 }
 
 form fieldset {
-    border: 1px solid #d1d9e6; /* Borda mais suave */
-    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     padding: 20px;
-    background-color: #fdfdfd; /* Fundo do fieldset levemente diferente */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    background-color: #fcfcfc;
 }
 
 form fieldset legend {
+    font-family: var(--font-headings);
     font-size: 1.15em;
-    font-weight: 600;
-    color: #2c3e50;
+    font-weight: 700;
+    color: var(--text-secondary);
     padding: 0 10px;
     margin-left: 5px;
 }
@@ -140,8 +269,9 @@ form fieldset legend {
 form label {
     display: block;
     font-weight: 600;
-    color: #555;
+    color: var(--text-secondary);
     margin-bottom: 8px;
+    font-size: 0.9em;
 }
 
 form input[type="text"],
@@ -150,20 +280,18 @@ form select,
 form textarea {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     font-size: 1em;
-    color: #495057;
+    font-family: var(--font-body);
+    color: var(--text-primary);
     background-color: #fff;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-form input[type="text"]:focus,
-form input[type="number"]:focus,
-form select:focus,
-form textarea:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+form input:focus, form select:focus, form textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 171, 145, 0.3);
     outline: none;
 }
 
@@ -172,273 +300,170 @@ form textarea {
     resize: vertical;
 }
 
-/* Preview de custos/preços nos formulários */
-form .cost-preview p,
-#form-cadastro-material p, /* Para o #custo-calculado-preview */
-#form-cadastro-receita .suggestion-container + p { /* Preço de venda sugerido */
-    margin-top: 10px;
-    padding: 12px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    text-align: left; /* Alinhar à esquerda para melhor leitura */
-    font-size: 0.95em;
-}
-form .cost-preview p strong,
-#form-cadastro-material p strong,
-#form-cadastro-receita .suggestion-container + p strong {
-    color: #333;
-}
-#custo-total-receita-preview,
-#preco-venda-sugerido-preview,
-#custo-calculado-preview { /* ID do span do material */
-    font-weight: bold;
-    color: #0056b3;
-}
-
-/* Botões de ação dentro de formulários */
-.form-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end; /* Alinha botões à direita por padrão */
-    margin-top: 15px;
-}
-
-/* === FORMULÁRIO DE CADASTRO DE MATERIAIS (Ajustes com base no anterior) === */
-#cadastrar-material-section h2 { /* Já coberto por h2 geral */ }
-#form-cadastro-material fieldset > div {
-    margin-bottom: 15px;
-}
-#form-cadastro-material fieldset > div:last-child {
-    margin-bottom: 0;
-}
-/* .form-actions-material é o mesmo que .form-actions */
-
-/* === FORMULÁRIO DE CADASTRO DE RECEITAS === */
-#cadastrar-receita-section h2 { /* Já coberto */ }
-
-#ingredientes-receita-container .ingrediente-field {
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px dashed #bdc3c7; /* Borda tracejada para distinguir campos de ingredientes */
-    border-radius: 5px;
-    background-color: #f8f9fa;
-}
-#ingredientes-receita-container .ingrediente-field legend {
-    font-size: 1em; /* Menor para legendas internas */
-    color: #7f8c8d;
-}
-
-#ingredientes-receita-container .ingrediente-field > div {
-    margin-bottom: 10px;
-}
-#ingredientes-receita-container .ingrediente-field > div:last-child {
-    margin-bottom: 0;
-}
-#ingredientes-receita-container .ingrediente-field .custo-ingrediente-preview {
-    font-size: 0.85em;
-    color: #555;
-    text-align: right;
-    margin-top: 5px;
-}
-
-/* === BOTÕES (Estilo Geral e Variações) === */
-button, .button-style { /* .button-style para aplicar a links se necessário */
-    padding: 10px 18px;
-    font-size: 1em;
-    font-weight: 600;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease;
-    text-align: center;
-    color: white; /* Cor de texto padrão para botões com fundo */
-}
-button:hover, .button-style:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Variações de Botões */
-button.btn-primary, #form-material-submit-btn, #form-receita-submit-btn {
-    background-color: #28a745; /* Verde */
-}
-button.btn-primary:hover, #form-material-submit-btn:hover, #form-receita-submit-btn:hover {
-    background-color: #218838;
-}
-
-button.btn-secondary, #cancelar-edicao-material-btn, #cancelar-edicao-btn {
-    background-color: #6c757d; /* Cinza */
-}
-button.btn-secondary:hover, #cancelar-edicao-material-btn:hover, #cancelar-edicao-btn:hover {
-    background-color: #5a6268;
-}
-
-button.btn-warning, #add-ingrediente-btn, #editar-receita-btn, .edit-material-btn {
-    background-color: #ffc107; /* Amarelo */
-    color: #212529; /* Texto escuro para fundo amarelo */
-}
-button.btn-warning:hover, #add-ingrediente-btn:hover, #editar-receita-btn:hover, .edit-material-btn:hover {
-    background-color: #e0a800;
-}
-
-#login-google-btn {
-    background-color: #db4437; /* Vermelho Google */
-}
-#login-google-btn:hover {
-    background-color: #c23327;
-}
-
-#logout-btn {
-    background-color: #007bff; /* Azul */
-}
-#logout-btn:hover {
-    background-color: #0056b3;
-}
-
-/* Botões na navegação principal */
-#app-nav button {
-    background-color: #3498db; /* Um azul diferente para navegação */
-    color: white;
-}
-#app-nav button:hover {
-    background-color: #2980b9;
-}
-
-/* Botões menores (ex: remover ingrediente) */
-button.btn-danger-small {
-    background-color: #e74c3c; /* Vermelho para remover */
-    padding: 6px 10px;
-    font-size: 0.85em;
-}
-button.btn-danger-small:hover {
-    background-color: #c0392b;
-}
-
-
-.remover-ingrediente-btn {
-    background-color: #dc3545; /* Vermelho Bootstrap para 'danger' */
-    color: white; /* Texto branco para melhor contraste */
-    border: none;
-    padding: 8px 12px; /* Ajuste o padding conforme necessário */
-    border-radius: 4px; /* Cantos arredondados */
-    cursor: pointer;
-    font-size: 0.9em; /* Tamanho da fonte */
-    margin-left: 10px; /* Adiciona um espaço à esquerda do botão */
-}
-
-.remover-ingrediente-btn:hover {
-    background-color: #c82333; /* Um vermelho um pouco mais escuro para o hover */
-}
-
-
-/* === LISTA DE RECEITAS (#listar-receitas-section) === */
-#receitas-container {
+.form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Grid responsivo */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
 }
 
-.recipe-card {
-    background-color: #fdfdfd;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.07);
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+p.cost-preview {
+    margin: 10px 0;
+    padding: 12px;
+    background-color: var(--background-light);
+    border-radius: 8px;
+    font-size: 1em;
+    border: 1px dashed var(--accent-color);
 }
-.recipe-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+p.cost-preview strong {
+    color: var(--text-secondary);
 }
-.recipe-card h3 {
-    margin-top: 0;
-    color: #007bff;
-}
-.recipe-card p {
-    font-size: 0.9em;
-    color: #555;
-    margin-bottom: 0;
+p.cost-preview span {
+    font-weight: bold;
+    color: var(--text-primary);
 }
 
-/* === DETALHES DA RECEITA (#detalhe-receita-section) === */
-#detalhe-receita-section h2 { /* Nome da receita */
-    color: #007bff;
-    margin-bottom: 15px;
+/* === LISTA DE RECEITAS === */
+#receitas-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
 }
-#detalhe-receita-section h3 { /* Ingredientes, Modo de Preparo */
+
+.receita-item { /* CORRIGIDO DE .recipe-card PARA .receita-item */
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+.receita-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.receita-item h3 {
+    padding: 20px;
+    margin: 0;
+    background-color: var(--primary-color);
+    color: #fff;
+    border-bottom: none;
+}
+.receita-item .details {
+    padding: 20px;
+    flex-grow: 1;
+}
+.receita-item p {
+    font-size: 0.95em;
+    color: var(--text-secondary);
+    margin-bottom: 0.5em;
+}
+
+/* === DETALHES DA RECEITA === */
+.cost-details {
+    background-color: var(--background-light);
+    border-radius: 8px;
+    padding: 20px;
     margin-top: 20px;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 5px;
+    border: 1px dashed var(--border-color);
 }
 #detalhe-receita-ingredientes {
-    padding-left: 20px; /* Recuo para lista de ingredientes */
-    list-style: disc;
+    list-style: none;
+    padding-left: 0;
 }
 #detalhe-receita-ingredientes li {
-    margin-bottom: 5px;
-    color: #444;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
 }
-#detalhe-receita-section p {
-    color: #444;
-    line-height: 1.7;
-}
-#detalhe-receita-section .cost-info {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
-    margin-top: 20px;
-    border: 1px solid #e9ecef;
-}
-#detalhe-receita-section .cost-info p {
-    margin-bottom: 8px;
-    font-size: 0.95em;
-}
-#detalhe-receita-section .cost-info p strong {
-    color: #333;
+#detalhe-receita-ingredientes li:before {
+    content: '\f1b0'; /* Ícone de uma folha/tempero */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: var(--accent-color);
+    margin-right: 10px;
 }
 
-/* === LISTA DE MATERIAIS CADASTRADOS (#cadastrar-material-section) === */
-#cadastrar-material-section > h3 { /* Título "Materiais Cadastrados" */
+
+/* === LISTA DE MATERIAIS === */
+.list-wrapper {
     margin-top: 40px;
-    margin-bottom: 15px;
-    color: #2c3e50;
-    text-align: left; /* Alinhar à esquerda para esta lista */
-    border-top: 1px solid #e0e0e0;
-    padding-top: 25px;
 }
 #lista-materiais-cadastrados li {
-    background-color: #fff;
+    background-color: #fcfcfc;
     padding: 12px 18px;
-    border: 1px solid #e7e7e7;
-    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    flex-wrap: wrap;
+    gap: 10px;
+    transition: background-color 0.3s;
 }
-#lista-materiais-cadastrados li .material-info {
-    font-size: 0.95em;
-    color: #333;
-}
-#lista-materiais-cadastrados li .material-actions .edit-material-btn {
-    /* Estilo já definido em button.btn-warning */
-    padding: 6px 12px;
-    font-size: 0.85em;
+#lista-materiais-cadastrados li:hover {
+    background-color: var(--background-light);
 }
 
+.ingrediente-item-form {
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+}
+.ingrediente-item-form > * {
+    flex: 1 1 150px;
+}
 
 /* === FOOTER === */
 footer {
     text-align: center;
-    padding: 1.5em 0;
-    background-color: #34495e;
-    color: #bdc3c7; /* Cor de texto mais clara para o footer */
+    padding: 2em 0;
+    background-color: var(--footer-background);
+    color: var(--footer-text);
     font-size: 0.9em;
-    position: fixed; /* Ou relative, dependendo do seu layout geral */
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    margin-top: 40px; /* Garante espaço acima do rodapé */
+}
+
+/* === MEDIA QUERIES PARA RESPONSIVIDADE === */
+@media (max-width: 768px) {
+    header .container {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    #app-nav .container {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #app-nav button {
+        width: 90%;
+        max-width: 400px;
+    }
+
+    .action-buttons {
+        justify-content: center;
+    }
+    .action-buttons button {
+        flex-grow: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 1.8em; }
+    h2 { font-size: 1.5em; }
+
+    main#app-content section {
+        padding: 20px 15px;
+    }
 }
