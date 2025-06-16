@@ -1,142 +1,122 @@
 // js/firestoreService.js
+// js/firestoreService.js
 let db;
 
 export function initFirestore(app) {
     db = firebase.firestore(app);
 }
 
+// --- Funções de Admin e Usuário ---
+
+// Checa se o usuário logado é o administrador
+export function isAdmin(user) {
+    // IMPORTANTE: Substitua pelo UID real do seu usuário administrador
+    const ADMIN_UID = "PX2X421ir9O6o9tIH0VprV0wbQc2"; 
+    return user && user.uid === ADMIN_UID;
+}
+
+// Busca todos os usuários que já cadastraram algo (para o filtro do admin)
+export async function getAllUsers() {
+    const users = new Map();
+    
+    // Busca usuários de receitas
+    const recipesSnapshot = await db.collection("receitas").get();
+    recipesSnapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.userId && !users.has(data.userId)) {
+             // Prioriza o nome do usuário salvo no documento
+            const userName = data.userName || `Usuário (${data.userId.substring(0, 6)}...)`;
+            users.set(data.userId, userName);
+        }
+    });
+
+    // Busca usuários de materiais
+    const materialsSnapshot = await db.collection("materiais").get();
+    materialsSnapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.userId && !users.has(data.userId)) {
+            const userName = data.userName || `Usuário (${data.userId.substring(0, 6)}...)`;
+            users.set(data.userId, userName);
+        }
+    });
+    
+    // Converte o Map para um array de objetos para ser usado no select
+    return Array.from(users, ([id, name]) => ({ id, name }));
+}
+
+
 // --- Serviços de Materiais / Ingredientes ---
 
-export const CONVERSION_FACTORS = { // Movido para cima para referência caso seja usado por outras funções
+export const CONVERSION_FACTORS = { 
     'kg': { 'g': 1000, 'kg': 1 },
     'g': { 'g': 1, 'kg': 0.001 },
     'L': { 'ml': 1000, 'L': 1 },
     'ml': { 'ml': 1, 'L': 0.001 }
-    // 'un': { 'un': 1} // Adicionar 'un' se quiser que calculateCostPerRecipeUnit lide com isso via CONVERSION_FACTORS
 };
 
 export function calculateCostPerRecipeUnit(precoCompra, quantidadeCompra, unidadeCompra, unidadeReceita) {
     precoCompra = parseFloat(precoCompra);
     quantidadeCompra = parseFloat(quantidadeCompra);
 
-    if (isNaN(precoCompra) || isNaN(quantidadeCompra) || quantidadeCompra <= 0) {
-        console.warn("Dados de compra inválidos para cálculo de custo:", {precoCompra, quantidadeCompra});
-        return null;
-    }
-
-    if (unidadeReceita === 'un') {
-        if (unidadeCompra === 'un') {
-             return precoCompra / quantidadeCompra;
-        } else {
-             console.warn(`Para unidadeReceita 'un', idealmente unidadeCompra ('${unidadeCompra}') também é 'un'. Cálculo pode não ser direto.`);
-             // Retornando null para forçar o usuário a definir a compra em 'un' se a receita usa 'un'
-             // Ou você pode ter uma lógica de conversão específica se, por ex, 'kg' de algo sempre tem X unidades.
-             return null;
-        }
-    }
-
-    // Verifica se a unidade de compra existe e se a conversão para unidade de receita é possível
-    if (!CONVERSION_FACTORS[unidadeCompra] || CONVERSION_FACTORS[unidadeCompra][unidadeReceita] === undefined) {
-        console.error(`Conversão impossível ou não suportada: de '${unidadeCompra}' para '${unidadeReceita}'.`);
-        return null;
-    }
-
+    if (isNaN(precoCompra) || isNaN(quantidadeCompra) || quantidadeCompra <= 0) return null;
+    if (unidadeReceita === 'un') return (unidadeCompra === 'un') ? (precoCompra / quantidadeCompra) : null;
+    if (!CONVERSION_FACTORS[unidadeCompra] || CONVERSION_FACTORS[unidadeCompra][unidadeReceita] === undefined) return null;
+    
     const factor = CONVERSION_FACTORS[unidadeCompra][unidadeReceita];
     const quantidadeTotalEmUnidadeReceita = quantidadeCompra * factor;
-
-    if (quantidadeTotalEmUnidadeReceita <= 0) {
-        console.warn("Quantidade total em unidade de receita calculada é zero ou negativa.");
-        return null;
-    }
-
-    return precoCompra / quantidadeTotalEmUnidadeReceita;
+    return (quantidadeTotalEmUnidadeReceita > 0) ? (precoCompra / quantidadeTotalEmUnidadeReceita) : null;
 }
 
 
 // Cadastrar Ingrediente
-export async function addMaterial(materialData) {
+export async function addMaterial(materialData, userIdFor = null, userNameFor = null) {
     try {
         const user = firebase.auth().currentUser;
         if (!user) throw new Error("Usuário não autenticado.");
 
-        let custoCalculado = calculateCostPerRecipeUnit(
-            materialData.precoCompra,
-            materialData.quantidadeCompra,
-            materialData.unidadeCompra,
-            materialData.unidadeReceita
-        );
+        let custoCalculado = calculateCostPerRecipeUnit(materialData.precoCompra, materialData.quantidadeCompra, materialData.unidadeCompra, materialData.unidadeReceita);
+        if (custoCalculado === null) throw new Error("Não foi possível calcular o custo. Verifique as unidades.");
 
-        // Se o cálculo retornou null e não é uma unidade 'un' (que tem sua própria lógica de cálculo acima), lance erro.
-        if (custoCalculado === null && materialData.unidadeReceita !== 'un') {
-            throw new Error("Não foi possível calcular o custo por unidade de receita. Verifique as unidades e valores fornecidos.");
-        }
-        // Se for 'un', e o cálculo acima não resolveu, pode ser um problema de configuração
-        if (materialData.unidadeReceita === 'un' && custoCalculado === null) {
-             // A lógica em calculateCostPerRecipeUnit já deve lidar com un/un.
-             // Se chegou aqui com null, é porque unidadeCompra não era 'un'.
-             throw new Error("Para unidade de receita 'un', a unidade de compra também deve ser 'un' e a quantidade de compra deve ser o número de unidades.");
-        }
-        // Garante que custoCalculado não seja null se passou pelas verificações.
-        // Se custoCalculado for null, a UI deve tratar ou impedir o salvamento.
-        // Mas para o banco, é melhor salvar um número ou um placeholder.
-        // No entanto, a lógica acima já lança erro se for null e não deveria ser.
-        // Se for intencionalmente null (ex: erro de conversão não bloqueante), usar 0 ou tratar.
-        // Por ora, as throws acima devem cobrir.
+        // Define o proprietário do documento. Se o admin especificou um, usa esse. Senão, usa o próprio admin/usuário.
+        const ownerId = isAdmin(user) && userIdFor ? userIdFor : user.uid;
+        const ownerName = isAdmin(user) && userNameFor ? userNameFor : (user.displayName || user.email);
 
         const dataToSave = {
-            nome: materialData.nome,
+            ...materialData,
             precoCompra: parseFloat(materialData.precoCompra),
             quantidadeCompra: parseFloat(materialData.quantidadeCompra),
-            unidadeCompra: materialData.unidadeCompra,
-            unidadeReceita: materialData.unidadeReceita,
-            custoPorUnidadeReceita: custoCalculado, // Salva o valor calculado (pode ser null se a lógica permitir)
-            userId: user.uid,
+            custoPorUnidadeReceita: custoCalculado,
+            userId: ownerId,
+            userName: ownerName,
             criadaEm: firebase.firestore.FieldValue.serverTimestamp()
         };
         const docRef = await db.collection("materiais").add(dataToSave);
         return { id: docRef.id, ...dataToSave };
     } catch (error) {
         console.error("Erro ao adicionar material: ", error);
-        throw error; // Re-throw para ser pego pela UI
+        throw error;
     }
 }
 
-// Atualização de Ingrediente
+// Atualização de Ingrediente (não muda a propriedade do documento)
 export async function updateMaterial(materialId, materialData) {
     try {
         const user = firebase.auth().currentUser;
         if (!user) throw new Error("Usuário não autenticado.");
 
-        let custoCalculado = calculateCostPerRecipeUnit(
-            materialData.precoCompra,
-            materialData.quantidadeCompra,
-            materialData.unidadeCompra,
-            materialData.unidadeReceita
-        );
-
-        if (custoCalculado === null && materialData.unidadeReceita !== 'un') {
-            throw new Error("Não foi possível calcular o custo por unidade de receita para atualização. Verifique as unidades e valores.");
-        }
-        if (materialData.unidadeReceita === 'un' && custoCalculado === null) {
-             throw new Error("Para unidade de receita 'un' na atualização, a unidade de compra também deve ser 'un'.");
-        }
+        let custoCalculado = calculateCostPerRecipeUnit(materialData.precoCompra, materialData.quantidadeCompra, materialData.unidadeCompra, materialData.unidadeReceita);
+        if (custoCalculado === null) throw new Error("Não foi possível calcular o custo para atualização.");
 
         const materialRef = db.collection("materiais").doc(materialId);
         const dataToUpdate = {
-            nome: materialData.nome,
+            ...materialData,
             precoCompra: parseFloat(materialData.precoCompra),
             quantidadeCompra: parseFloat(materialData.quantidadeCompra),
-            unidadeCompra: materialData.unidadeCompra,
-            unidadeReceita: materialData.unidadeReceita,
             custoPorUnidadeReceita: custoCalculado,
-            userId: user.uid, // Garante que o userId não seja removido na atualização
             atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
         };
         await materialRef.update(dataToUpdate);
-        // Retornar o objeto completo com os dados atualizados e o ID
-        // É uma boa prática buscar o documento novamente para garantir consistência,
-        // mas para simplificar, vamos retornar o que foi enviado para atualização.
-        return { id: materialId, ...dataToUpdate, criadaEm: materialData.criadaEm }; // Preservar criadaEm se existir no objeto original
+        return { id: materialId, ...dataToUpdate };
     } catch (error) {
         console.error("Erro ao atualizar material: ", error);
         throw error;
@@ -144,74 +124,32 @@ export async function updateMaterial(materialId, materialData) {
 }
 
 // Obter dados de Ingredientes
-export async function getMaterials() {
+export async function getMaterials(userIdToFilter = null) {
     try {
         const user = firebase.auth().currentUser;
-        if (!user) {
-            console.log("Nenhum usuário autenticado para buscar materiais.");
-            return []; // Retorna array vazio se não houver usuário
-        }
+        if (!user) return [];
 
-        const snapshot = await db.collection("materiais")
-                                 .where("userId", "==", user.uid) // <<< FILTRAR POR USUÁRIO LOGADO
-                                 .orderBy("nome") // Opcional: ordenar por nome
-                                 .get();
-        const materials = [];
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            materials.push({
-                id: doc.id,
-                nome: data.nome || 'Nome Indisponível',
-                precoCompra: data.precoCompra !== undefined ? data.precoCompra : 0,
-                quantidadeCompra: data.quantidadeCompra !== undefined ? data.quantidadeCompra : 0,
-                unidadeCompra: data.unidadeCompra || 'N/A',
-                // >>> AJUSTES CRÍTICOS AQUI para evitar 'toFixed' em undefined <<<
-                unidadeReceita: data.unidadeReceita || 'un', // Fallback para 'un' se não definido
-                custoPorUnidadeReceita: (data.custoPorUnidadeReceita !== undefined && data.custoPorUnidadeReceita !== null)
-                                          ? data.custoPorUnidadeReceita
-                                          : 0, // Fallback para 0 se undefined ou null
-                criadaEm: data.criadaEm, // Preservar outros campos
-                userId: data.userId
-            });
-        });
-        return materials;
+        let query = db.collection("materiais");
+
+        if (userIdToFilter) {
+            query = query.where("userId", "==", userIdToFilter);
+        } else if (!isAdmin(user)) {
+            query = query.where("userId", "==", user.uid);
+        }
+        
+        const snapshot = await query.orderBy("nome").get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
     } catch (error) {
         console.error("Erro ao buscar materiais: ", error);
-        throw error; // Re-throw para ser pego pela UI
+        throw error;
     }
 }
 
 export async function getMaterialById(materialId) {
     try {
-        const user = firebase.auth().currentUser; // Opcional: verificar se o material pertence ao usuário
-        if (!user) throw new Error("Usuário não autenticado.");
-
         const doc = await db.collection("materiais").doc(materialId).get();
-        if (doc.exists) {
-            const data = doc.data();
-            // Opcional: Verificar se data.userId === user.uid se for uma regra de negócio
-            if (data.userId !== user.uid) {
-                console.warn("Tentativa de acesso a material de outro usuário.");
-                return null; // Ou lançar um erro de permissão
-            }
-            return {
-                id: doc.id,
-                nome: data.nome || 'Nome Indisponível',
-                precoCompra: data.precoCompra !== undefined ? data.precoCompra : 0,
-                quantidadeCompra: data.quantidadeCompra !== undefined ? data.quantidadeCompra : 0,
-                unidadeCompra: data.unidadeCompra || 'N/A',
-                // >>> AJUSTES CRÍTICOS AQUI <<<
-                unidadeReceita: data.unidadeReceita || 'un',
-                custoPorUnidadeReceita: (data.custoPorUnidadeReceita !== undefined && data.custoPorUnidadeReceita !== null)
-                                          ? data.custoPorUnidadeReceita
-                                          : 0,
-                criadaEm: data.criadaEm,
-                userId: data.userId
-            };
-        } else {
-            console.log("Nenhum material encontrado com o ID:", materialId);
-            return null;
-        }
+        return doc.exists ? { id: doc.id, ...doc.data() } : null;
     } catch (error) {
         console.error("Erro ao buscar material por ID:", error);
         throw error;
@@ -219,19 +157,21 @@ export async function getMaterialById(materialId) {
 }
 
 // --- Serviços de Receitas ---
-// (O restante do código de receitas parece OK, não foram reportados erros nele)
-export async function addRecipe(recipeData) {
+export async function addRecipe(recipeData, userIdFor = null, userNameFor = null) {
     try {
         const user = firebase.auth().currentUser;
         if (!user) throw new Error("Usuário não autenticado.");
 
+        const ownerId = isAdmin(user) && userIdFor ? userIdFor : user.uid;
+        const ownerName = isAdmin(user) && userNameFor ? userNameFor : (user.displayName || user.email);
+
         const dataToSave = {
             ...recipeData,
-            userId: user.uid,
+            userId: ownerId,
+            userName: ownerName,
             criadaEm: firebase.firestore.FieldValue.serverTimestamp()
         };
         const docRef = await db.collection("receitas").add(dataToSave);
-        console.log("Receita adicionada com ID: ", docRef.id);
         return { id: docRef.id, ...dataToSave };
     } catch (error) {
         console.error("Erro ao adicionar receita: ", error);
@@ -239,17 +179,22 @@ export async function addRecipe(recipeData) {
     }
 }
 
-export async function getRecipes() {
+export async function getRecipes(userIdToFilter = null) {
     try {
         const user = firebase.auth().currentUser;
         if (!user) return [];
 
-        const snapshot = await db.collection("receitas").where("userId", "==", user.uid).orderBy("criadaEm", "desc").get();
-        const recipes = [];
-        snapshot.forEach(doc => {
-            recipes.push({ id: doc.id, ...doc.data() });
-        });
-        return recipes;
+        let query = db.collection("receitas");
+
+        if (userIdToFilter) {
+            query = query.where("userId", "==", userIdToFilter);
+        } else if (!isAdmin(user)) {
+            query = query.where("userId", "==", user.uid);
+        }
+        
+        const snapshot = await query.orderBy("criadaEm", "desc").get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
     } catch (error) {
         console.error("Erro ao buscar receitas: ", error);
         throw error;
@@ -258,45 +203,22 @@ export async function getRecipes() {
 
 export async function getRecipeById(recipeId) {
     try {
-        const user = firebase.auth().currentUser;
-        if (!user) throw new Error("Usuário não autenticado.");
-
         const doc = await db.collection("receitas").doc(recipeId).get();
-        if (doc.exists) {
-            const data = doc.data();
-            if (data.userId !== user.uid) {
-                 console.warn("Tentativa de acesso a receita de outro usuário.");
-                 return null;
-            }
-            return { id: doc.id, ...doc.data() };
-        } else {
-            console.log("Nenhuma receita encontrada com este ID!");
-            return null;
-        }
+        return doc.exists ? { id: doc.id, ...doc.data() } : null;
     } catch (error) {
         console.error("Erro ao buscar receita por ID: ", error);
         throw error;
     }
 }
+
 export async function updateRecipe(recipeId, recipeData) {
     try {
-        const user = firebase.auth().currentUser;
-        if (!user) throw new Error("Usuário não autenticado.");
-        
-        // Opcional: buscar a receita primeiro para garantir que pertence ao usuário
-        const currentRecipeDoc = await db.collection("receitas").doc(recipeId).get();
-        if (!currentRecipeDoc.exists || currentRecipeDoc.data().userId !== user.uid) {
-            throw new Error("Receita não encontrada ou não pertence ao usuário.");
-        }
-
         const recipeRef = db.collection("receitas").doc(recipeId);
         await recipeRef.update({
             ...recipeData,
-            userId: user.uid, // Garantir que o userId permaneça
             atualizadaEm: firebase.firestore.FieldValue.serverTimestamp()
         });
-        console.log("Receita atualizada com ID: ", recipeId);
-        return { id: recipeId, ...recipeData }; // Idealmente, retorne o objeto atualizado do Firestore
+        return { id: recipeId, ...recipeData };
     } catch (error) {
         console.error("Erro ao atualizar receita: ", error);
         throw error;

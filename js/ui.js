@@ -8,10 +8,8 @@ export let allMaterialsCache = []; // Cache para os materiais disponíveis
 const loginBtn = document.getElementById('login-google-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const userInfoP = document.getElementById('user-info');
-const authContainer = document.getElementById('auth-container');
 const appNav = document.getElementById('app-nav');
 const appContent = document.getElementById('app-content');
-
 const listarReceitasSection = document.getElementById('listar-receitas-section');
 const detalheReceitaSection = document.getElementById('detalhe-receita-section');
 const cadastrarMaterialSection = document.getElementById('cadastrar-material-section');
@@ -19,21 +17,20 @@ const cadastrarReceitaSection = document.getElementById('cadastrar-receita-secti
 const formReceitaTitulo = document.getElementById('form-receita-titulo');
 const formReceitaSubmitBtn = document.getElementById('form-receita-submit-btn');
 const cancelarEdicaoBtnUI = document.getElementById('cancelar-edicao-btn');
-// Campos do formulário que serão populados
 const receitaNomeInput = document.getElementById('receita-nome');
 const receitaInstrucoesInput = document.getElementById('receita-instrucoes');
 const formMaterialTitulo = document.getElementById('form-material-titulo');
 const formMaterialSubmitBtn = document.getElementById('form-material-submit-btn');
 const cancelarEdicaoMaterialBtnUI = document.getElementById('cancelar-edicao-material-btn');
 const materialNomeInput = document.getElementById('material-nome');
-const materialUnidadeInput = document.getElementById('material-unidade');
-const materialPrecoInput = document.getElementById('material-preco');
 const listaMateriaisCadastradosUI = document.getElementById('lista-materiais-cadastrados');
 const materialPrecoCompraInput = document.getElementById('material-preco-compra');
 const materialQtdCompraInput = document.getElementById('material-qtd-compra');
 const materialUnidadeCompraSelect = document.getElementById('material-unidade-compra');
 const materialUnidadeReceitaSelect = document.getElementById('material-unidade-receita');
 const custoCalculadoPreviewSpan = document.getElementById('custo-calculado-preview');
+const adminFilterContainer = document.getElementById('admin-filter-container');
+const userFilterSelect = document.getElementById('user-filter-select');
 
 const sections = [listarReceitasSection, detalheReceitaSection, cadastrarMaterialSection, cadastrarReceitaSection];
 let onEditMaterialCallback = null;
@@ -42,18 +39,34 @@ export function setOnEditMaterialCallback(callback) {
     onEditMaterialCallback = callback;
 }
 
+// --- Funções de UI para Admin ---
+
+export function toggleAdminFilter(isAdmin) {
+    adminFilterContainer.style.display = isAdmin ? 'block' : 'none';
+}
+
+export function setupAdminFilter(users, onChangeCallback) {
+    userFilterSelect.innerHTML = '<option value="">Todos os Usuários</option>'; // Opção para ver todos
+    users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.id;
+        option.textContent = user.name;
+        userFilterSelect.appendChild(option);
+    });
+    userFilterSelect.removeEventListener('change', onChangeCallback); // Evita duplicar listener
+    userFilterSelect.addEventListener('change', onChangeCallback);
+}
+
+
 //Opções de Ações para Menu Ingredientes
-
-export function setMaterialFormMode(mode) { // Remova 'materialId' dos parâmetros aqui
-    // currentEditingMaterialId = materialId; // <<< REMOVA ESTA LINHA
-
+export function setMaterialFormMode(mode) {
     if (mode === 'edit') {
-        formMaterialTitulo.textContent = 'Editar Ingrediente';
-        formMaterialSubmitBtn.textContent = 'Atualizar Ingrediente';
-        cancelarEdicaoMaterialBtnUI.style.display = 'inline-block';
+        formMaterialTitulo.innerHTML = '<i class="fas fa-edit"></i> Editar Ingrediente';
+        formMaterialSubmitBtn.innerHTML = '<i class="fas fa-save"></i> Atualizar Ingrediente';
+        cancelarEdicaoMaterialBtnUI.style.display = 'inline-flex';
     } else { // 'create'
-        formMaterialTitulo.textContent = 'Cadastrar Novo Ingrediente';
-        formMaterialSubmitBtn.textContent = 'Adicionar Ingrediente';
+        formMaterialTitulo.innerHTML = '<i class="fas fa-plus-circle"></i> Cadastrar Novo Ingrediente';
+        formMaterialSubmitBtn.innerHTML = '<i class="fas fa-save"></i> Adicionar Ingrediente';
         cancelarEdicaoMaterialBtnUI.style.display = 'none';
         clearMaterialForm();
     }
@@ -65,23 +78,20 @@ export function populateMaterialFormForEdit(material) {
     materialQtdCompraInput.value = material.quantidadeCompra !== undefined ? parseFloat(material.quantidadeCompra) : '';
     materialUnidadeCompraSelect.value = material.unidadeCompra || '';
     materialUnidadeReceitaSelect.value = material.unidadeReceita || '';
-    updateCustoCalculadoPreview(); // Atualiza o preview com os dados carregados
+    updateCustoCalculadoPreview();
 }
 
 export function getMaterialFormData() {
     const nome = materialNomeInput.value.trim();
-    const precoCompra = materialPrecoCompraInput.value; // Já é string, parseFloat no backend
-    const quantidadeCompra = materialQtdCompraInput.value; // Já é string, parseFloat no backend
+    const precoCompra = materialPrecoCompraInput.value;
+    const quantidadeCompra = materialQtdCompraInput.value;
     const unidadeCompra = materialUnidadeCompraSelect.value;
     const unidadeReceita = materialUnidadeReceitaSelect.value;
 
-    // Validação básica dos campos obrigatórios
     if (!nome || !precoCompra || !quantidadeCompra || !unidadeCompra || !unidadeReceita) {
         alert("Por favor, preencha todos os campos do material obrigatórios.");
         return null;
     }
-    // Validação mais específica (ex: números positivos) pode ser feita aqui ou antes de chamar calculateCostPerRecipeUnit
-
     return { nome, precoCompra, quantidadeCompra, unidadeCompra, unidadeReceita };
 }
 
@@ -105,7 +115,7 @@ export function updateLoginUI(user) {
         userInfoP.style.display = 'block';
         appNav.style.display = 'block';
         appContent.style.display = 'block';
-        showSection('listar-receitas-section'); // Mostrar lista de receitas por padrão
+        showSection('listar-receitas-section');
     } else {
         loginBtn.style.display = 'inline-block';
         logoutBtn.style.display = 'none';
@@ -113,42 +123,39 @@ export function updateLoginUI(user) {
         appNav.style.display = 'none';
         appContent.style.display = 'none';
         hideAllSections();
+        toggleAdminFilter(false); // Esconde filtro no logout
     }
 }
 
 // --- UI para Receitas ---
 const receitasContainer = document.getElementById('receitas-container');
 export function renderRecipeList(recipes, onRecipeClickCallback) {
-    receitasContainer.innerHTML = ''; // Limpa a lista existente
+    receitasContainer.innerHTML = '';
     if (recipes.length === 0) {
-        receitasContainer.innerHTML = '<p>Nenhuma receita cadastrada ainda.</p>';
+        receitasContainer.innerHTML = '<p>Nenhuma receita encontrada para este usuário.</p>';
         return;
     }
- recipes.forEach(recipe => {
+    recipes.forEach(recipe => {
         const item = document.createElement('div');
-        item.classList.add('receita-item');
+        item.classList.add('receita-item'); 
 
-        // Preparar as strings de custo e preço de venda
         const custoText = `Custo: R$ ${parseFloat(recipe.custoTotal || 0).toFixed(2)}`;
-        let precoVendaText = '';
-
-        // Verifica se os campos de margem e preço de venda existem na receita
-        // (para compatibilidade com receitas antigas)
+        let precoVendaText = 'Preço de Venda: N/A';
         if (typeof recipe.precoVendaSugerido !== 'undefined') {
-            precoVendaText = `Preço de Venda sugerido: R$ ${parseFloat(recipe.precoVendaSugerido).toFixed(2)}`;
+            precoVendaText = `Venda: R$ ${parseFloat(recipe.precoVendaSugerido).toFixed(2)}`;
             if (typeof recipe.margemLucro !== 'undefined') {
                 precoVendaText += ` (${recipe.margemLucro.toFixed(0)}%)`;
             }
-        } else {
-            precoVendaText = 'Preço de Venda sugerido: Não calculado';
         }
-
+        
         item.innerHTML = `
             <h3>${recipe.nome}</h3>
-            <p>${custoText}</p>
-            <p>${precoVendaText}</p>
+            <div class="details">
+                <p>${custoText}</p>
+                <p>${precoVendaText}</p>
+                ${recipe.userName ? `<p class="recipe-owner">Por: ${recipe.userName}</p>` : ''}
+            </div>
         `;
-        // Adicionamos um data attribute para fácil acesso ao ID se necessário no futuro
         item.dataset.recipeId = recipe.id;
         item.addEventListener('click', () => onRecipeClickCallback(recipe.id));
         receitasContainer.appendChild(item);
@@ -161,10 +168,15 @@ const detalheIngredientes = document.getElementById('detalhe-receita-ingrediente
 const detalheInstrucoes = document.getElementById('detalhe-receita-instrucoes');
 const detalheCusto = document.getElementById('detalhe-receita-custo');
 
-
 export function renderRecipeDetails(recipe) {
     detalheNome.textContent = recipe.nome;
-    detalheInstrucoes.textContent = recipe.instrucoes;
+    
+    if (recipe.instrucoes) {
+        detalheInstrucoes.innerHTML = recipe.instrucoes.replace(/\n/g, '<br>');
+    } else {
+        detalheInstrucoes.innerHTML = '';
+    }
+
     detalheCusto.textContent = parseFloat(recipe.custoTotal || 0).toFixed(2);
     const detalheMargem = document.getElementById('detalhe-receita-margem');
     const detalhePrecoVenda = document.getElementById('detalhe-receita-preco-venda');
@@ -189,15 +201,14 @@ export function renderRecipeDetails(recipe) {
 const listaMateriaisCadastradosEl = document.getElementById('lista-materiais-cadastrados');
 
 export function renderMaterialsList(materials) {
-    allMaterialsCache = materials; // Cache para os selects de receita
+    allMaterialsCache = materials;
     listaMateriaisCadastradosUI.innerHTML = '';
     if (!materials || materials.length === 0) {
-        listaMateriaisCadastradosUI.innerHTML = '<li>Nenhum material cadastrado.</li>';
+        listaMateriaisCadastradosUI.innerHTML = '<li>Nenhum material cadastrado para este usuário.</li>';
         return;
     }
     materials.forEach(material => {
         const li = document.createElement('li');
-        // Exibe o custo por unidade de receita
         const custoDisplay = material.custoPorUnidadeReceita !== undefined ?
             `R$ ${parseFloat(material.custoPorUnidadeReceita).toFixed(4)} / ${material.unidadeReceita}` :
             'Custo não calculado';
@@ -205,14 +216,14 @@ export function renderMaterialsList(materials) {
         li.innerHTML = `
             <span class="material-info">${material.nome} (${custoDisplay})</span>
             <div class="material-actions">
-                <button class="edit-material-btn" data-id="${material.id}">Editar</button>
+                <button class="edit-material-btn" data-id="${material.id}"><i class="fas fa-edit"></i> Editar</button>
             </div>
         `;
         const editBtn = li.querySelector('.edit-material-btn');
         if (editBtn) {
             editBtn.addEventListener('click', (event) => {
-                const materialId = event.target.dataset.id;
-                if (onEditMaterialCallback) { // onEditMaterialCallback foi setado em app.js
+                const materialId = event.target.closest('button').dataset.id;
+                if (onEditMaterialCallback) { 
                     onEditMaterialCallback(materialId);
                 }
             });
@@ -227,45 +238,23 @@ const custoTotalReceitaPreview = document.getElementById('custo-total-receita-pr
 const margemLucroPercentualInput = document.getElementById('margem-lucro-percentual');
 const precoVendaSugeridoPreview = document.getElementById('preco-venda-sugerido-preview');
 
-let ingredientesDaReceitaAtual = []; // Armazena os ingredientes adicionados no formulário
+export async function setupRecipeForm() {
+    // Busca os materiais mais recentes ao abrir o formulário
+    await getMaterials().then(materials => {
+        allMaterialsCache = materials; // Atualiza o cache
+    });
 
-
-// CRUCIAL: Atualizar como os selects de material nas receitas são populados
-
-export function _populateMaterialSelect(materialSelect) {
-    materialSelect.innerHTML = '<option value="">Selecione um material</option>';
-
-    if (allMaterialsCache && allMaterialsCache.length > 0) {
-        allMaterialsCache.forEach(material => {
-            const option = document.createElement('option');
-            option.value = material.id;
-            // O texto da opção agora mostra o custo calculado e a unidade de receita
-            option.textContent = `${material.nome} (R$ ${parseFloat(material.custoPorUnidadeReceita || 0).toFixed(4)}/${material.unidadeReceita})`;
-            // O dataset.unidade agora é a unidade DA RECEITA
-            option.dataset.unidade = material.unidadeReceita;
-            // O dataset.precoUnidade agora é o CUSTO POR UNIDADE DE RECEITA
-            option.dataset.precoUnidade = material.custoPorUnidadeReceita;
-            materialSelect.appendChild(option);
-        });
-    }
-}
-
-export function setupRecipeForm() {
-    ingredientesReceitaContainer.innerHTML = ''; // Limpa ingredientes anteriores
-    ingredientesDaReceitaAtual = [];
+    ingredientesReceitaContainer.innerHTML = ''; 
     updateRecipeCostPreview();
-    addIngredienteField(); // Adiciona o primeiro campo de ingrediente
-    // Adiciona o listener para o campo de margem de lucro
-    // Remova qualquer listener antigo para evitar duplicação se setupRecipeForm for chamado múltiplas vezes
+    addIngredienteField(); 
     margemLucroPercentualInput.removeEventListener('input', updateSalePricePreview);
     margemLucroPercentualInput.addEventListener('input', updateSalePricePreview);
     updateSalePricePreview();
-
 }
 
 export function addIngredienteField() {
-    if (!allMaterialsCache || allMaterialsCache.length === 0) { // Adicionada verificação de nulidade/vazio
-        alert("Cadastre materiais primeiro para poder adicioná-los à receita.");
+    if (!allMaterialsCache || allMaterialsCache.length === 0) {
+        alert("Nenhum material cadastrado. Por favor, cadastre um ingrediente primeiro.");
         return;
     }
 
@@ -273,58 +262,36 @@ export function addIngredienteField() {
     const div = document.createElement('div');
     div.classList.add('ingrediente-item-form');
     div.innerHTML = `
-        <label for="material-select-${fieldIndex}">Material:</label>
         <select id="material-select-${fieldIndex}" class="material-select" required>
             <option value="">Selecione um material</option>
             ${allMaterialsCache.map(m => {
-                // Usar custoPorUnidadeReceita e unidadeReceita
-                const custoDisplay = parseFloat(m.custoPorUnidadeReceita || 0).toFixed(4); // Usar 4 casas para o display no select
+                const custoDisplay = parseFloat(m.custoPorUnidadeReceita || 0).toFixed(4);
                 const unidadeReceitaDisplay = m.unidadeReceita || 'N/A';
-                return `<option value="${m.id}" data-preco="${m.custoPorUnidadeReceita}" data-unidade="${unidadeReceitaDisplay}">${m.nome} (${unidadeReceitaDisplay} - R$ ${custoDisplay})</option>`;
+                return `<option value="${m.id}" data-preco="${m.custoPorUnidadeReceita}" data-unidade="${unidadeReceitaDisplay}">${m.nome} (${unidadeReceitaDisplay})</option>`;
             }).join('')}
         </select>
-        <label for="quantidade-material-${fieldIndex}">Quantidade:</label>
-        <input type="number" id="quantidade-material-${fieldIndex}" class="quantidade-material" step="0.01" min="0" required placeholder="Ex: 0.5">
-        <span class="unidade-display-receita"></span>
-        <p>Custo do ingrediente: R$ <span class="custo-ingrediente-preview">0.00</span></p>
-        <button type="button" class="remover-ingrediente-btn">Remover</button>
+        <input type="number" id="quantidade-material-${fieldIndex}" class="quantidade-material" step="0.01" min="0" required placeholder="Qtd.">
+        <p class="custo-ingrediente-preview">Custo: R$ <span>0.00</span></p>
+        <button type="button" class="remover-ingrediente-btn"><i class="fas fa-trash-alt"></i></button>
     `;
     ingredientesReceitaContainer.appendChild(div);
 
     const select = div.querySelector('.material-select');
     const quantidadeInput = div.querySelector('.quantidade-material');
-    const unidadeDisplay = div.querySelector('.unidade-display-receita');
-    const custoPreviewSpan = div.querySelector('.custo-ingrediente-preview'); // Este é o <span>
+    const custoPreviewSpan = div.querySelector('.custo-ingrediente-preview span'); 
 
-    select.addEventListener('change', (e) => {
-        const selectedOption = e.target.options[e.target.selectedIndex];
-        if (selectedOption && selectedOption.value) { // Apenas se uma opção de material válida for selecionada
-            unidadeDisplay.textContent = `(${selectedOption.dataset.unidade || ''})`;
-        } else {
-            unidadeDisplay.textContent = ''; // Limpa se "Selecione um material"
-        }
-        updateSingleIngredientCost(select, quantidadeInput, custoPreviewSpan); // Passa o <span>
+    select.addEventListener('change', () => {
+        updateSingleIngredientCost(select, quantidadeInput, custoPreviewSpan);
         updateRecipeCostPreview();
     });
-
     quantidadeInput.addEventListener('input', () => {
-        updateSingleIngredientCost(select, quantidadeInput, custoPreviewSpan); // Passa o <span>
+        updateSingleIngredientCost(select, quantidadeInput, custoPreviewSpan);
         updateRecipeCostPreview();
     });
-
     div.querySelector('.remover-ingrediente-btn').addEventListener('click', () => {
         div.remove();
-        updateRecipeCostPreview(); // Fundamental recalcular ao remover
+        updateRecipeCostPreview();
     });
-
-    // Chame para definir a unidade inicial se o select já tiver um valor (ao editar)
-    // ou para limpar a unidade se for "Selecione um material"
-    const initialSelectedOption = select.options[select.selectedIndex];
-    if (initialSelectedOption && initialSelectedOption.value) {
-        unidadeDisplay.textContent = `(${initialSelectedOption.dataset.unidade || ''})`;
-    } else {
-        unidadeDisplay.textContent = '';
-    }
 }
 
 function updateCustoCalculadoPreview() {
@@ -334,54 +301,36 @@ function updateCustoCalculadoPreview() {
     const unidadeReceita = materialUnidadeReceitaSelect.value;
 
     if (precoCompra && qtdCompra && unidadeCompra && unidadeReceita) {
-        // Usar a função de cálculo importada ou definida localmente
-        // Para usar aqui, calculateCostPerRecipeUnit precisaria ser exportada de firestoreService.js
-        // e importada em ui.js, ou movida para um local comum.
-        // Por ora, podemos assumir que o backend fará o cálculo final.
-        // Esta preview é apenas uma estimativa visual.
-        // Para um preview preciso, a função calculateCostPerRecipeUnit teria que ser chamada aqui.
-        // Vamos simplificar e apenas mostrar "Aguardando cálculo" ou algo similar,
-        // já que o cálculo real e a validação ocorrem no backend/firestoreService.
-        // Ou, para um preview real, você precisaria ter acesso à função de cálculo aqui.
-
-        // Exemplo com chamada à função (requer que ela seja acessível aqui)
-    const custo = calculateCostPerRecipeUnit(precoCompra, qtdCompra, unidadeCompra, unidadeReceita);
-    if (custo !== null && isFinite(custo)) { // Adicionado isFinite para checar se é um número válido
-        custoCalculadoPreviewSpan.textContent = `${custo.toFixed(5)} / ${unidadeReceita}`;
-    } else {
-        custoCalculadoPreviewSpan.textContent = "Verifique unidades";
-    }
-
+        const custo = calculateCostPerRecipeUnit(precoCompra, qtdCompra, unidadeCompra, unidadeReceita);
+        if (custo !== null && isFinite(custo)) { 
+            custoCalculadoPreviewSpan.textContent = `${custo.toFixed(5)} / ${unidadeReceita}`;
+        } else {
+            custoCalculadoPreviewSpan.textContent = "Verifique unidades";
+        }
     } else {
         custoCalculadoPreviewSpan.textContent = "---";
     }
 }
 
-// Adicionar listeners para atualizar o preview
 if(materialPrecoCompraInput && materialQtdCompraInput && materialUnidadeCompraSelect && materialUnidadeReceitaSelect) {
     [materialPrecoCompraInput, materialQtdCompraInput, materialUnidadeCompraSelect, materialUnidadeReceitaSelect].forEach(el => {
         el.addEventListener('input', updateCustoCalculadoPreview);
-        el.addEventListener('change', updateCustoCalculadoPreview); // Para selects
+        el.addEventListener('change', updateCustoCalculadoPreview);
     });
 }
 
 function updateSingleIngredientCost(materialSelect, quantidadeInput, custoPreviewEl) {
     const selectedOption = materialSelect.options[materialSelect.selectedIndex];
-    const precoPorUnidade = parseFloat(selectedOption.dataset.precoPorUnidade);
-    const quantidade = parseFloat(quantidadeInput.value);
-if (selectedOption && selectedOption.value && typeof selectedOption.dataset.preco !== 'undefined') {
-        const precoPorUnidade = parseFloat(selectedOption.dataset.preco); // Vem de data-preco
+    if (selectedOption && selectedOption.value && typeof selectedOption.dataset.preco !== 'undefined') {
+        const precoPorUnidade = parseFloat(selectedOption.dataset.preco);
         const quantidade = parseFloat(quantidadeInput.value);
-
         if (!isNaN(precoPorUnidade) && !isNaN(quantidade) && quantidade > 0) {
-            const custo = precoPorUnidade * quantidade;
-            custoPreviewEl.textContent = custo.toFixed(2); // APENAS O NÚMERO
+            custoPreviewEl.textContent = (precoPorUnidade * quantidade).toFixed(2);
         } else {
-            custoPreviewEl.textContent = "0.00"; // APENAS O NÚMERO
+            custoPreviewEl.textContent = "0.00";
         }
     } else {
-        // Caso "Selecione um material" ou opção sem data-preco
-        custoPreviewEl.textContent = "0.00"; // APENAS O NÚMERO
+        custoPreviewEl.textContent = "0.00";
     }   
 }
 
@@ -389,7 +338,7 @@ export function updateRecipeCostPreview() {
     let custoTotal = 0;
     const ingredienteFields = ingredientesReceitaContainer.querySelectorAll('.ingrediente-item-form');
     ingredienteFields.forEach(field => {
-        const custoText = field.querySelector('.custo-ingrediente-preview').textContent;
+        const custoText = field.querySelector('.custo-ingrediente-preview span').textContent;
         custoTotal += parseFloat(custoText) || 0;
     });
     custoTotalReceitaPreview.textContent = custoTotal.toFixed(2);
@@ -411,19 +360,16 @@ export function getRecipeFormData() {
         if (selectedOption.value && quantidadeInput.value) {
             const materialId = selectedOption.value;
             const materialDoCache = allMaterialsCache.find(m => m.id === materialId);
-            const nomeMaterial = materialDoCache ? materialDoCache.nome : selectedOption.text.split(' (')[0]; // Fallback se não achar no cache            const quantidade = parseFloat(quantidadeInput.value);
+            const nomeMaterial = materialDoCache ? materialDoCache.nome : selectedOption.text.split(' (')[0];
+            const quantidade = parseFloat(quantidadeInput.value);
             const unidadeMaterial = selectedOption.dataset.unidade;
             const precoPorUnidade = parseFloat(selectedOption.dataset.preco);
-            const custoIngrediente = precoPorUnidade * quantidade;
 
-            ingredientes.push({
-                materialId,
-                nomeMaterial,
-                quantidade,
-                unidadeMaterial,
-                custoIngrediente
-            });
-            custoTotalCalculado += custoIngrediente;
+            if (!isNaN(precoPorUnidade) && !isNaN(quantidade)) {
+                const custoIngrediente = precoPorUnidade * quantidade;
+                ingredientes.push({ materialId, nomeMaterial, quantidade, unidadeMaterial, custoIngrediente });
+                custoTotalCalculado += custoIngrediente;
+            }
         }
     });
 
@@ -431,36 +377,31 @@ export function getRecipeFormData() {
         alert("Por favor, preencha todos os campos da receita, incluindo pelo menos um ingrediente.");
         return null;
     }
-    // CAPTURANDO OS VALORES DOS ELEMENTOS ESPECIFICADOS:
-    // Pega o valor ATUAL do input com id "margem-lucro-percentual"
+
     const margemLucroValor = parseFloat(margemLucroPercentualInput.value) || 0;
-    // Pega o valor ATUAL (textContent) do span com id "preco-venda-sugerido-preview"
-    const precoVendaValor = parseFloat(precoVendaSugeridoPreview.textContent) || 0;
+    const precoVendaCalculado = custoTotalCalculado * (1 + (margemLucroValor / 100));
+
    return {
         nome,
         instrucoes,
         ingredientes,
         custoTotal: custoTotalCalculado,
         margemLucro: margemLucroValor,
-        precoVendaSugerido: precoVendaCalculado // Use o valor recalculado
+        precoVendaSugerido: precoVendaCalculado
     };
 }
 
 export function clearRecipeForm() {
     document.getElementById('form-cadastro-receita').reset();
     ingredientesReceitaContainer.innerHTML = '';
-    margemLucroPercentualInput.value = '100'; // Valor padrão
-    addIngredienteField(); // Adiciona um campo de ingrediente inicial
-    updateRecipeCostPreview(); // Isso já chama updateSalePricePreview que resetará o valor
+    margemLucroPercentualInput.value = '100';
+    addIngredienteField();
+    updateRecipeCostPreview();
 }
 
 export function clearMaterialForm() {
     document.getElementById('form-cadastro-material').reset();
-    custoCalculadoPreviewSpan.textContent = "---"; // Limpa o preview
-    // Se materialNomeInput for uma referência global/módulo:
-    // materialNomeInput.value = '';
-    // materialPrecoCompraInput.value = '';
-    // ... etc.
+    custoCalculadoPreviewSpan.textContent = "---";
 }
 
 export function updateSalePricePreview() {
@@ -477,59 +418,47 @@ export function updateSalePricePreview() {
 }
 export function setRecipeFormMode(mode, recipeId = null) {
     if (mode === 'edit') {
-        formReceitaTitulo.textContent = 'Editar Receita';
-        formReceitaSubmitBtn.textContent = 'Atualizar Receita';
-        cancelarEdicaoBtnUI.style.display = 'inline-block';
-    } else { // 'create' mode
-        formReceitaTitulo.textContent = 'Cadastrar Nova Receita';
-        formReceitaSubmitBtn.textContent = 'Salvar Receita';
+        formReceitaTitulo.innerHTML = '<i class="fas fa-edit"></i> Editar Receita';
+        formReceitaSubmitBtn.innerHTML = '<i class="fas fa-save"></i> Atualizar Receita';
+        cancelarEdicaoBtnUI.style.display = 'inline-flex';
+    } else { 
+        formReceitaTitulo.innerHTML = '<i class="fas fa-pen-fancy"></i> Cadastrar Nova Receita';
+        formReceitaSubmitBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Receita';
         cancelarEdicaoBtnUI.style.display = 'none';
-        clearRecipeForm(); // Garante que o formulário está limpo para nova receita
+        clearRecipeForm();
     }
 }
 
 export function populateRecipeFormForEdit(recipe) {
-    clearRecipeForm(); // Começa limpando para evitar resíduos
+    clearRecipeForm(); 
 
     receitaNomeInput.value = recipe.nome || '';
     receitaInstrucoesInput.value = recipe.instrucoes || '';
     margemLucroPercentualInput.value = typeof recipe.margemLucro !== 'undefined' ? recipe.margemLucro : '100';
 
-    ingredientesReceitaContainer.innerHTML = ''; // Limpa campos de ingredientes existentes
+    ingredientesReceitaContainer.innerHTML = '';
 
     if (recipe.ingredientes && Array.isArray(recipe.ingredientes)) {
         recipe.ingredientes.forEach(ing => {
-            addIngredienteField(); // Adiciona um novo conjunto de campos de ingrediente
+            addIngredienteField();
             const lastIngredienteField = ingredientesReceitaContainer.lastElementChild;
             if (lastIngredienteField) {
                 const materialSelect = lastIngredienteField.querySelector('.material-select');
                 const quantidadeInput = lastIngredienteField.querySelector('.quantidade-material');
-                const unidadeDisplay = lastIngredienteField.querySelector('.unidade-display-receita'); // Para atualizar
-                const custoPreview = lastIngredienteField.querySelector('.custo-ingrediente-preview'); // Para atualizar
+                const custoPreview = lastIngredienteField.querySelector('.custo-ingrediente-preview span');
 
                 if (materialSelect) materialSelect.value = ing.materialId;
                 if (quantidadeInput) quantidadeInput.value = ing.quantidade;
-
-                // Disparar manualmente a atualização da unidade e custo do ingrediente individual
-                // após definir os valores
+                
                 if (materialSelect && quantidadeInput && custoPreview) {
-                    const selectedOption = materialSelect.options[materialSelect.selectedIndex];
-                    if (selectedOption && selectedOption.value) { // Garante que uma opção válida está selecionada
-                         unidadeDisplay.textContent = `(${selectedOption.dataset.unidade || ''})`;
-                         updateSingleIngredientCost(materialSelect, quantidadeInput, custoPreview);
-                    } else if (materialSelect.options.length > 0) { // Se não achou, mas há opções, tenta a primeira
-                        materialSelect.selectedIndex = 0; // ou uma opção placeholder
-                        // e chama updateSingleIngredientCost
-                    }
+                     updateSingleIngredientCost(materialSelect, quantidadeInput, custoPreview);
                 }
             }
         });
     }
-    if (recipe.ingredientes.length === 0) { // Se a receita salva não tinha ingredientes
+    if (recipe.ingredientes.length === 0) { 
         addIngredienteField();
     }
 
-
-    updateRecipeCostPreview(); // Recalcula custo total e preço de venda com os dados carregados
+    updateRecipeCostPreview();
 }
-
