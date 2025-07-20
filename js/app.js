@@ -165,8 +165,7 @@ navListarReceitas.addEventListener('click', () => {
 navCadastrarReceita.addEventListener('click', async () => {
     currentEditingRecipeId = null;
     setRecipeFormMode('create');
-    await loadAndRenderMaterials();
-    setupRecipeForm();
+    await setupRecipeForm(); // setupRecipeForm já carrega os materiais
     showSection('cadastrar-receita-section');
 });
 
@@ -186,10 +185,10 @@ editarReceitaBtnApp.addEventListener('click', async () => {
     if (!currentViewingRecipeId) return;
     currentEditingRecipeId = currentViewingRecipeId;
     try {
-        await loadAndRenderMaterials();
         const recipeToEdit = await getRecipeById(currentEditingRecipeId);
         if (recipeToEdit) {
             setRecipeFormMode('edit');
+            await setupRecipeForm(); // Garante que os materiais estão carregados
             populateRecipeFormForEdit(recipeToEdit);
             showSection('cadastrar-receita-section');
         } else {
