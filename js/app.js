@@ -3,8 +3,7 @@ import { firebaseConfig } from './config.js';
 import { initAuth, signInWithGoogle, signOutUser } from './auth.js';
 import {
     initFirestore, addMaterial, getMaterials, getMaterialById, updateMaterial,
-    addRecipe, getRecipes, getRecipeById, updateRecipe,
-    isAdmin, getAllUsers // Funções de admin
+    addRecipe, getRecipes, getRecipeById, updateRecipe
 } from './firestoreService.js';
 import {
     updateLoginUI, showSection,
@@ -12,8 +11,7 @@ import {
     renderMaterialsList, setupRecipeForm, addIngredienteField, getRecipeFormData, clearRecipeForm, clearMaterialForm,
     setRecipeFormMode, populateRecipeFormForEdit,
     setMaterialFormMode, populateMaterialFormForEdit, getMaterialFormData,
-    setOnEditMaterialCallback,
-    setupAdminFilter, toggleAdminFilter // Funções de UI para admin
+    setOnEditMaterialCallback
 } from './ui.js';
 
 // Inicializa Firebase
@@ -25,7 +23,6 @@ initFirestore(app);
 let currentEditingRecipeId = null;
 let currentViewingRecipeId = null;
 let currentEditingMaterialId = null;
-let currentUserIsAdmin = false;
 
 // Elementos do DOM
 const loginBtn = document.getElementById('login-google-btn');
@@ -39,34 +36,26 @@ const addIngredienteBtn = document.getElementById('add-ingrediente-btn');
 const voltarParaListaBtn = document.getElementById('voltar-para-lista-btn');
 const editarReceitaBtnApp = document.getElementById('editar-receita-btn');
 const cancelarEdicaoBtnApp = document.getElementById('cancelar-edicao-btn');
-const userFilterSelect = document.getElementById('user-filter-select');
 
 // --- Lógica da Aplicação ---
 
 async function handleAuthStateChange(user) {
     updateLoginUI(user);
-    currentUserIsAdmin = isAdmin(user);
-    toggleAdminFilter(currentUserIsAdmin);
 
     if (user) {
-        if (currentUserIsAdmin) {
-            const users = await getAllUsers();
-            setupAdminFilter(users, handleUserFilterChange);
-        }
         await loadInitialData();
         showSection('listar-receitas-section');
     }
 }
 
 async function loadInitialData() {
-    const selectedUserId = currentUserIsAdmin ? userFilterSelect.value : null;
-    await loadAndRenderRecipes(selectedUserId);
-    await loadAndRenderMaterials(selectedUserId);
+    await loadAndRenderRecipes();
+    await loadAndRenderMaterials();
 }
 
-async function loadAndRenderRecipes(userId = null) {
+async function loadAndRenderRecipes() {
     try {
-        const recipes = await getRecipes(userId);
+        const recipes = await getRecipes();
         renderRecipeList(recipes, handleRecipeClick);
     } catch (error) {
         console.error("Erro ao carregar receitas:", error);
@@ -74,9 +63,9 @@ async function loadAndRenderRecipes(userId = null) {
     }
 }
 
-async function loadAndRenderMaterials(userId = null) {
+async function loadAndRenderMaterials() {
     try {
-        const materials = await getMaterials(userId);
+        const materials = await getMaterials();
         renderMaterialsList(materials);
     } catch (error) {
         console.error("Erro ao carregar materiais:", error);
@@ -114,10 +103,6 @@ async function handleEditMaterialClick(materialId) {
     }
 }
 
-function handleUserFilterChange() {
-    loadInitialData();
-}
-
 // --- Event Listeners ---
 
 loginBtn.addEventListener('click', signInWithGoogle);
@@ -132,15 +117,12 @@ formCadastroMaterial.addEventListener('submit', async (e) => {
                 await updateMaterial(currentEditingMaterialId, materialData);
                 alert('Material atualizado com sucesso!');
             } else {
-                // Lógica para criar como admin para outro usuário
-                const selectedUserId = currentUserIsAdmin ? userFilterSelect.value : null;
-                const selectedUserName = currentUserIsAdmin && userFilterSelect.value ? userFilterSelect.options[userFilterSelect.selectedIndex].text : null;
-                await addMaterial(materialData, selectedUserId, selectedUserName);
+                await addMaterial(materialData);
                 alert('Material cadastrado com sucesso!');
             }
             currentEditingMaterialId = null;
             setMaterialFormMode('create');
-            await loadAndRenderMaterials(currentUserIsAdmin ? userFilterSelect.value : null);
+            await loadAndRenderMaterials();
         } catch (error) {
             alert("Erro ao salvar material: " + error.message);
         }
@@ -158,16 +140,13 @@ formCadastroReceita.addEventListener('submit', async (e) => {
                 alert('Receita atualizada com sucesso!');
                 savedRecipeId = currentEditingRecipeId;
             } else {
-                // Lógica para criar como admin para outro usuário
-                const selectedUserId = currentUserIsAdmin ? userFilterSelect.value : null;
-                const selectedUserName = currentUserIsAdmin && userFilterSelect.value ? userFilterSelect.options[userFilterSelect.selectedIndex].text : null;
-                const newRecipe = await addRecipe(recipeData, selectedUserId, selectedUserName);
+                const newRecipe = await addRecipe(recipeData);
                 alert('Receita cadastrada com sucesso!');
                 savedRecipeId = newRecipe.id;
             }
             currentEditingRecipeId = null;
             setRecipeFormMode('create');
-            await loadAndRenderRecipes(currentUserIsAdmin ? userFilterSelect.value : null);
+            await loadAndRenderRecipes();
             handleRecipeClick(savedRecipeId);
         } catch (error) {
             alert('Erro ao salvar receita: ' + error.message);
@@ -186,7 +165,7 @@ navListarReceitas.addEventListener('click', () => {
 navCadastrarReceita.addEventListener('click', async () => {
     currentEditingRecipeId = null;
     setRecipeFormMode('create');
-    await loadAndRenderMaterials(currentUserIsAdmin ? userFilterSelect.value : null);
+    await loadAndRenderMaterials();
     setupRecipeForm();
     showSection('cadastrar-receita-section');
 });
@@ -194,7 +173,7 @@ navCadastrarReceita.addEventListener('click', async () => {
 navCadastrarMaterial.addEventListener('click', async () => {
     currentEditingMaterialId = null;
     setMaterialFormMode('create');
-    await loadAndRenderMaterials(currentUserIsAdmin ? userFilterSelect.value : null);
+    await loadAndRenderMaterials();
     showSection('cadastrar-material-section');
 });
 
@@ -207,7 +186,7 @@ editarReceitaBtnApp.addEventListener('click', async () => {
     if (!currentViewingRecipeId) return;
     currentEditingRecipeId = currentViewingRecipeId;
     try {
-        await loadAndRenderMaterials(currentUserIsAdmin ? userFilterSelect.value : null);
+        await loadAndRenderMaterials();
         const recipeToEdit = await getRecipeById(currentEditingRecipeId);
         if (recipeToEdit) {
             setRecipeFormMode('edit');

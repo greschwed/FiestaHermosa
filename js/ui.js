@@ -29,8 +29,6 @@ const materialQtdCompraInput = document.getElementById('material-qtd-compra');
 const materialUnidadeCompraSelect = document.getElementById('material-unidade-compra');
 const materialUnidadeReceitaSelect = document.getElementById('material-unidade-receita');
 const custoCalculadoPreviewSpan = document.getElementById('custo-calculado-preview');
-const adminFilterContainer = document.getElementById('admin-filter-container');
-const userFilterSelect = document.getElementById('user-filter-select');
 
 const sections = [listarReceitasSection, detalheReceitaSection, cadastrarMaterialSection, cadastrarReceitaSection];
 let onEditMaterialCallback = null;
@@ -39,24 +37,7 @@ export function setOnEditMaterialCallback(callback) {
     onEditMaterialCallback = callback;
 }
 
-// --- Funções de UI para Admin ---
-
-export function toggleAdminFilter(isAdmin) {
-    adminFilterContainer.style.display = isAdmin ? 'block' : 'none';
-}
-
-export function setupAdminFilter(users, onChangeCallback) {
-    userFilterSelect.innerHTML = '<option value="">Todos os Usuários</option>'; // Opção para ver todos
-    users.forEach(user => {
-        const option = document.createElement('option');
-        option.value = user.id;
-        option.textContent = user.name;
-        userFilterSelect.appendChild(option);
-    });
-    userFilterSelect.removeEventListener('change', onChangeCallback); // Evita duplicar listener
-    userFilterSelect.addEventListener('change', onChangeCallback);
-}
-
+// As funções de UI para Admin (toggleAdminFilter, setupAdminFilter) foram removidas.
 
 //Opções de Ações para Menu Ingredientes
 export function setMaterialFormMode(mode) {
@@ -123,7 +104,6 @@ export function updateLoginUI(user) {
         appNav.style.display = 'none';
         appContent.style.display = 'none';
         hideAllSections();
-        toggleAdminFilter(false); // Esconde filtro no logout
     }
 }
 
@@ -132,12 +112,12 @@ const receitasContainer = document.getElementById('receitas-container');
 export function renderRecipeList(recipes, onRecipeClickCallback) {
     receitasContainer.innerHTML = '';
     if (recipes.length === 0) {
-        receitasContainer.innerHTML = '<p>Nenhuma receita encontrada para este usuário.</p>';
+        receitasContainer.innerHTML = '<p>Nenhuma receita encontrada.</p>';
         return;
     }
     recipes.forEach(recipe => {
         const item = document.createElement('div');
-        item.classList.add('receita-item'); 
+        item.classList.add('receita-item');
 
         const custoText = `Custo: R$ ${parseFloat(recipe.custoTotal || 0).toFixed(2)}`;
         let precoVendaText = 'Preço de Venda: N/A';
@@ -147,7 +127,7 @@ export function renderRecipeList(recipes, onRecipeClickCallback) {
                 precoVendaText += ` (${recipe.margemLucro.toFixed(0)}%)`;
             }
         }
-        
+
         item.innerHTML = `
             <h3>${recipe.nome}</h3>
             <div class="details">
@@ -170,7 +150,7 @@ const detalheCusto = document.getElementById('detalhe-receita-custo');
 
 export function renderRecipeDetails(recipe) {
     detalheNome.textContent = recipe.nome;
-    
+
     if (recipe.instrucoes) {
         detalheInstrucoes.innerHTML = recipe.instrucoes.replace(/\n/g, '<br>');
     } else {
@@ -204,7 +184,7 @@ export function renderMaterialsList(materials) {
     allMaterialsCache = materials;
     listaMateriaisCadastradosUI.innerHTML = '';
     if (!materials || materials.length === 0) {
-        listaMateriaisCadastradosUI.innerHTML = '<li>Nenhum material cadastrado para este usuário.</li>';
+        listaMateriaisCadastradosUI.innerHTML = '<li>Nenhum material cadastrado.</li>';
         return;
     }
     materials.forEach(material => {
@@ -223,7 +203,7 @@ export function renderMaterialsList(materials) {
         if (editBtn) {
             editBtn.addEventListener('click', (event) => {
                 const materialId = event.target.closest('button').dataset.id;
-                if (onEditMaterialCallback) { 
+                if (onEditMaterialCallback) {
                     onEditMaterialCallback(materialId);
                 }
             });
@@ -244,9 +224,9 @@ export async function setupRecipeForm() {
         allMaterialsCache = materials; // Atualiza o cache
     });
 
-    ingredientesReceitaContainer.innerHTML = ''; 
+    ingredientesReceitaContainer.innerHTML = '';
     updateRecipeCostPreview();
-    addIngredienteField(); 
+    addIngredienteField();
     margemLucroPercentualInput.removeEventListener('input', updateSalePricePreview);
     margemLucroPercentualInput.addEventListener('input', updateSalePricePreview);
     updateSalePricePreview();
@@ -278,7 +258,7 @@ export function addIngredienteField() {
 
     const select = div.querySelector('.material-select');
     const quantidadeInput = div.querySelector('.quantidade-material');
-    const custoPreviewSpan = div.querySelector('.custo-ingrediente-preview span'); 
+    const custoPreviewSpan = div.querySelector('.custo-ingrediente-preview span');
 
     select.addEventListener('change', () => {
         updateSingleIngredientCost(select, quantidadeInput, custoPreviewSpan);
@@ -302,7 +282,7 @@ function updateCustoCalculadoPreview() {
 
     if (precoCompra && qtdCompra && unidadeCompra && unidadeReceita) {
         const custo = calculateCostPerRecipeUnit(precoCompra, qtdCompra, unidadeCompra, unidadeReceita);
-        if (custo !== null && isFinite(custo)) { 
+        if (custo !== null && isFinite(custo)) {
             custoCalculadoPreviewSpan.textContent = `${custo.toFixed(5)} / ${unidadeReceita}`;
         } else {
             custoCalculadoPreviewSpan.textContent = "Verifique unidades";
@@ -331,7 +311,7 @@ function updateSingleIngredientCost(materialSelect, quantidadeInput, custoPrevie
         }
     } else {
         custoPreviewEl.textContent = "0.00";
-    }   
+    }
 }
 
 export function updateRecipeCostPreview() {
@@ -342,7 +322,7 @@ export function updateRecipeCostPreview() {
         custoTotal += parseFloat(custoText) || 0;
     });
     custoTotalReceitaPreview.textContent = custoTotal.toFixed(2);
-    updateSalePricePreview(); 
+    updateSalePricePreview();
 }
 
 export function getRecipeFormData() {
@@ -421,7 +401,7 @@ export function setRecipeFormMode(mode, recipeId = null) {
         formReceitaTitulo.innerHTML = '<i class="fas fa-edit"></i> Editar Receita';
         formReceitaSubmitBtn.innerHTML = '<i class="fas fa-save"></i> Atualizar Receita';
         cancelarEdicaoBtnUI.style.display = 'inline-flex';
-    } else { 
+    } else {
         formReceitaTitulo.innerHTML = '<i class="fas fa-pen-fancy"></i> Cadastrar Nova Receita';
         formReceitaSubmitBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Receita';
         cancelarEdicaoBtnUI.style.display = 'none';
@@ -430,7 +410,7 @@ export function setRecipeFormMode(mode, recipeId = null) {
 }
 
 export function populateRecipeFormForEdit(recipe) {
-    clearRecipeForm(); 
+    clearRecipeForm();
 
     receitaNomeInput.value = recipe.nome || '';
     receitaInstrucoesInput.value = recipe.instrucoes || '';
@@ -449,14 +429,14 @@ export function populateRecipeFormForEdit(recipe) {
 
                 if (materialSelect) materialSelect.value = ing.materialId;
                 if (quantidadeInput) quantidadeInput.value = ing.quantidade;
-                
+
                 if (materialSelect && quantidadeInput && custoPreview) {
                      updateSingleIngredientCost(materialSelect, quantidadeInput, custoPreview);
                 }
             }
         });
     }
-    if (recipe.ingredientes.length === 0) { 
+    if (recipe.ingredientes.length === 0) {
         addIngredienteField();
     }
 
