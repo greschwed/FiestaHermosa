@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<title>Marmita — Sistema de Gestão</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"/>
+<style>
+  body { background: #ece4d8; }
+  /* Force consistent fonts on inputs */
+  input, select, textarea, button { font-family: 'Geist', system-ui, sans-serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="icons.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="screens/dashboard.jsx"></script>
+<script type="text/babel" src="screens/lista-insumos.jsx"></script>
+<script type="text/babel" src="screens/cadastro-insumo.jsx"></script>
+<script type="text/babel" src="screens/lista-receitas.jsx"></script>
+<script type="text/babel" src="screens/detalhe-receita.jsx"></script>
+<script type="text/babel" src="screens/cadastro-receita-a.jsx"></script>
+<script type="text/babel" src="screens/cadastro-receita-b.jsx"></script>
+<script type="text/babel" src="screens/cadastro-receita-c.jsx"></script>
+
+<script type="text/babel">
+const App = () => {
+  // Mobile artboard size — phone proportions
+  const MOBILE_W = 390;
+  const MOBILE_H = 780;
+  // Desktop artboard size — laptop-ish 16:10
+  const DESK_W = 1280;
+  const DESK_H = 800;
+
+  return (
+    <DesignCanvas
+      title="Marmita — Gestão de receitas e insumos"
+      subtitle="Sistema para marmitaria · estética calorosa · custo + preço sugerido em tempo real"
+    >
+      <DCSection id="overview" title="Fluxo principal" subtitle="Mobile-first · 5 telas que cobrem o uso diário">
+        <DCArtboard id="dashboard" label="01 · Dashboard" width={MOBILE_W} height={MOBILE_H}>
+          <Dashboard/>
+        </DCArtboard>
+        <DCArtboard id="lista-insumos" label="02 · Lista de insumos" width={MOBILE_W} height={MOBILE_H}>
+          <ListaInsumos/>
+        </DCArtboard>
+        <DCArtboard id="cadastro-insumo" label="03 · Cadastrar insumo" width={MOBILE_W} height={MOBILE_H}>
+          <CadastroInsumo/>
+        </DCArtboard>
+        <DCArtboard id="lista-receitas" label="04 · Lista de receitas" width={MOBILE_W} height={MOBILE_H}>
+          <ListaReceitas/>
+        </DCArtboard>
+        <DCArtboard id="detalhe-receita" label="05 · Ficha técnica" width={MOBILE_W} height={MOBILE_H}>
+          <DetalheReceita/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="receita-variations"
+        title="Cadastro de receita — 3 variações"
+        subtitle="A tela mais importante do sistema. Mesma lógica de cálculo, três abordagens de UX."
+      >
+        <DCArtboard id="receita-a" label="A · Mobile clean (rodapé sticky com cálculo)" width={MOBILE_W} height={MOBILE_H}>
+          <CadastroReceitaA/>
+        </DCArtboard>
+        <DCArtboard id="receita-b" label="B · Desktop com painel de cálculo lateral" width={DESK_W} height={DESK_H}>
+          <CadastroReceitaB/>
+        </DCArtboard>
+        <DCArtboard id="receita-c" label="C · Editorial / 'recibo do chef'" width={DESK_W} height={DESK_H}>
+          <CadastroReceitaC/>
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
