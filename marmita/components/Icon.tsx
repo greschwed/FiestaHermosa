@@ -3,9 +3,10 @@ interface IconProps {
   size?: number;
   stroke?: number;
   color?: string;
+  style?: React.CSSProperties;
 }
 
-export default function Icon({ name, size = 18, stroke = 1.6, color = 'currentColor' }: IconProps) {
+export default function Icon({ name, size = 18, stroke = 1.6, color = 'currentColor', style }: IconProps) {
   const props = {
     width: size,
     height: size,
@@ -51,10 +52,12 @@ export default function Icon({ name, size = 18, stroke = 1.6, color = 'currentCo
     sparkles: <><path d="M12 3l1.9 5.4L19 10l-5.1 1.6L12 17l-1.9-5.4L5 10l5.1-1.6z"/><path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7zM5 3l.5 1.5L7 5l-1.5.5L5 7l-.5-1.5L3 5l1.5-.5z"/></>,
     info: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>,
     grid: <><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></>,
+    alertcircle: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>,
+    loader: <><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></>,
   };
 
   return (
-    <svg {...props} style={{ display: 'block', flexShrink: 0 }}>
+    <svg {...props} style={{ display: 'block', flexShrink: 0, ...style }}>
       {paths[name] || <circle cx="12" cy="12" r="10"/>}
     </svg>
   );
