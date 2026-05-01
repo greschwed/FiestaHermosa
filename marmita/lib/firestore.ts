@@ -29,6 +29,41 @@ export async function deleteInsumo(uid: string, id: string) {
   await deleteDoc(doc(insumosCol(uid), id));
 }
 
+// Recalcula custoTotal/custoPorcao/precoSugerido de todas as receitas
+// que contêm o insumo alterado, usando os preços atuais da tabela de insumos.
+export async function recalcReceitasComInsumo(uid: string, insumoId: string) {
+  const [insumosSnap, receitasSnap] = await Promise.all([
+    getDocs(insumosCol(uid)),
+    getDocs(receitasCol(uid)),
+  ]);
+
+  const insumoMap = new Map(
+    insumosSnap.docs.map(d => [d.id, { id: d.id, ...d.data() } as Insumo])
+  );
+
+  const updates: Promise<void>[] = [];
+
+  for (const snap of receitasSnap.docs) {
+    const rec = { id: snap.id, ...snap.data() } as Receita;
+    if (!rec.ingredientes?.some(i => i.id === insumoId)) continue;
+
+    const custoTotal = rec.ingredientes.reduce((s, ing) => {
+      const ins = insumoMap.get(ing.id);
+      return s + (ins ? ing.qtd * ins.custoUn : 0);
+    }, 0);
+    const custoPorcao = custoTotal / (rec.rendimento || 1);
+    const precoSugerido =
+      (custoPorcao * (1 + (rec.margem || 0) / 100)) /
+      (1 - (rec.taxaApp || 0) / 100);
+
+    updates.push(
+      updateDoc(doc(receitasCol(uid), snap.id), { custoTotal, custoPorcao, precoSugerido })
+    );
+  }
+
+  if (updates.length) await Promise.all(updates);
+}
+
 // ── Receitas ─────────────────────────────────────────────
 export async function getReceitas(uid: string): Promise<Receita[]> {
   const snap = await getDocs(query(receitasCol(uid), orderBy('nome')));

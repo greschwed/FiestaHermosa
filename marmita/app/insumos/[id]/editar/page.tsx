@@ -8,7 +8,7 @@ import AuthGuard from '@/components/AuthGuard';
 import Icon from '@/components/Icon';
 import ConfirmModal from '@/components/ConfirmModal';
 import { useAuth } from '@/lib/auth-context';
-import { getInsumo, updateInsumo, deleteInsumo, getReceitas } from '@/lib/firestore';
+import { getInsumo, updateInsumo, deleteInsumo, getReceitas, recalcReceitasComInsumo } from '@/lib/firestore';
 import { UNIDADES } from '@/lib/data';
 import type { Receita } from '@/lib/data';
 
@@ -50,6 +50,7 @@ function EditarInsumoContent() {
       qtdCompra: parseFloat(qtd),
       custoUn,
     });
+    await recalcReceitasComInsumo(user.uid, id);
     router.push('/insumos');
   };
 
