@@ -17,8 +17,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Marmita — Gestão de Receitas",
-  description: "Sistema de gestão para marmitaria: cadastro de insumos, receitas e cálculo de custos",
+  title: "Fiesta Hermosa — Gestão de Receitas",
+  description: "Sistema de gestão para restaurante: cadastro de insumos, receitas e cálculo de custos",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

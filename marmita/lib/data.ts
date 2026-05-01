@@ -69,7 +69,7 @@ export const RECEITAS: Receita[] = [
       'Cozinhe o arroz integral em fogo médio com 2,5 partes de água.',
       'Refogue o brócolis no alho com um fio de óleo, sem deixar amolecer.',
       'Grelhe o frango em chapa quente, 4 min de cada lado.',
-      'Monte a marmita: arroz, brócolis, frango por cima.',
+      'Monte o prato: arroz, brócolis, frango por cima.',
     ],
   },
   {

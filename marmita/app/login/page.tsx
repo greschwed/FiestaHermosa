@@ -26,7 +26,7 @@ export default function LoginPage() {
           <Icon name="chefhat" size={36} color="#fff" stroke={1.4} />
         </div>
 
-        <h1 className="serif" style={{ fontSize: 36, letterSpacing: '-0.02em', marginBottom: 6 }}>Marmita</h1>
+        <h1 className="serif" style={{ fontSize: 36, letterSpacing: '-0.02em', marginBottom: 6 }}>Fiesta Hermosa</h1>
         <p style={{ fontSize: 14, color: 'var(--ink-3)', marginBottom: 40 }}>
           Gestão de receitas e insumos
         </p>
