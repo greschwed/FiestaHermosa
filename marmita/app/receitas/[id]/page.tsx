@@ -55,25 +55,19 @@ function DetalheReceitaContent() {
     <div className="app-shell">
       <StatusBar />
 
-      <div style={{ position: 'relative', height: 220, flexShrink: 0 }}>
-        <div className="img-placeholder" style={{ position: 'absolute', inset: 0, borderRadius: 0, fontSize: 12 }}>foto do prato</div>
-        <div style={{ position: 'absolute', top: 14, left: 14, right: 14, display: 'flex', justifyContent: 'space-between' }}>
-          <Link href="/receitas" className="iconbtn" style={{ background: 'rgba(255,255,255,0.92)', border: 'none' }}>
-            <Icon name="arrowLeft" size={18} />
-          </Link>
-          <button className="iconbtn" style={{ background: 'rgba(255,255,255,0.92)', border: 'none' }}>
-            <Icon name="edit" size={16} />
-          </button>
-        </div>
+      <div className="appbar">
+        <Link href="/receitas" className="iconbtn"><Icon name="arrowLeft" size={18} /></Link>
+        <span style={{ fontSize: 14, color: 'var(--ink-3)' }}>Ficha técnica</span>
+        <Link href={`/receitas/${id}/editar`} className="iconbtn">
+          <Icon name="edit" size={16} />
+        </Link>
       </div>
 
-      <div className="scroll" style={{ marginTop: -24, background: 'var(--bg)', borderTopLeftRadius: 24, borderTopRightRadius: 24, position: 'relative', zIndex: 2 }}>
+      <div className="scroll">
         <span className={`chip ${receita.cat === 'Fitness' ? 'olive' : receita.cat === 'Vegano' ? 'good' : 'honey'}`} style={{ marginBottom: 8, display: 'inline-flex' }}>{receita.cat}</span>
         <h2 className="serif" style={{ fontSize: 26, margin: '8px 0 4px', letterSpacing: '-0.02em', lineHeight: 1.15 }}>{receita.nome}</h2>
         <div style={{ display: 'flex', gap: 14, fontSize: 13, color: 'var(--ink-3)', marginBottom: 16, alignItems: 'center' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Icon name="users" size={13} /> rende {receita.rendimento}</span>
-          <span style={{ opacity: 0.4 }}>·</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Icon name="timer" size={13} /> 35 min</span>
         </div>
 
         {/* Preço */}
@@ -123,7 +117,7 @@ function DetalheReceitaContent() {
         )}
 
         {/* Preparo */}
-        {receita.preparo.length > 0 && (
+        {receita.preparo && receita.preparo.length > 0 && (
           <>
             <div className="serif" style={{ fontSize: 18, marginBottom: 8 }}>Modo de preparo</div>
             <div className="col gap-3" style={{ marginBottom: 24 }}>

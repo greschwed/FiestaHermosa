@@ -54,25 +54,20 @@ function ListaReceitasContent() {
           : <div className="col gap-3">
             {filtered.map(r => (
               <Link key={r.id} href={`/receitas/${r.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="card" style={{ padding: 0, display: 'flex', overflow: 'hidden' }}>
-                  <div className="img-placeholder" style={{ width: 104, minHeight: 120, borderRadius: 0, fontSize: 10, flexShrink: 0 }}>{r.foto}</div>
-                  <div style={{ padding: 14, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div className="card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                    <span className={`chip ${r.cat === 'Fitness' ? 'olive' : r.cat === 'Vegano' ? 'good' : 'honey'}`} style={{ fontSize: 11, padding: '3px 8px' }}>{r.cat}</span>
+                    <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>rende {r.rendimento}</span>
+                  </div>
+                  <div className="serif" style={{ fontSize: 18, lineHeight: 1.2, letterSpacing: '-0.01em', marginBottom: 12 }}>{r.nome}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <div>
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
-                        <span className={`chip ${r.cat === 'Fitness' ? 'olive' : r.cat === 'Vegano' ? 'good' : 'honey'}`} style={{ fontSize: 11, padding: '3px 8px' }}>{r.cat}</span>
-                        <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>· rende {r.rendimento}</span>
-                      </div>
-                      <div className="serif" style={{ fontSize: 17, lineHeight: 1.2, letterSpacing: '-0.01em' }}>{r.nome}</div>
+                      <div style={{ fontSize: 11, color: 'var(--ink-3)' }}>Custo/porção</div>
+                      <div className="tnum" style={{ fontSize: 13, fontWeight: 500 }}>{fmtBRL(r.custoPorcao)}</div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 10 }}>
-                      <div>
-                        <div style={{ fontSize: 11, color: 'var(--ink-3)' }}>Custo/porção</div>
-                        <div className="tnum" style={{ fontSize: 13, fontWeight: 500 }}>{fmtBRL(r.custoPorcao)}</div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 11, color: 'var(--ink-3)' }}>Sugerido</div>
-                        <div className="serif tnum" style={{ fontSize: 18, color: 'var(--terracotta)' }}>{fmtBRL(r.precoSugerido)}</div>
-                      </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 11, color: 'var(--ink-3)' }}>Sugerido</div>
+                      <div className="serif tnum" style={{ fontSize: 20, color: 'var(--terracotta)' }}>{fmtBRL(r.precoSugerido)}</div>
                     </div>
                   </div>
                 </div>

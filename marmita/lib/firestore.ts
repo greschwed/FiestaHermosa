@@ -35,6 +35,12 @@ export async function getReceitas(uid: string): Promise<Receita[]> {
   return snap.docs.map(d => ({ id: d.id, ...d.data() } as Receita));
 }
 
+export async function getInsumo(uid: string, id: string): Promise<Insumo | null> {
+  const snap = await getDoc(doc(insumosCol(uid), id));
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...snap.data() } as Insumo;
+}
+
 export async function getReceita(uid: string, id: string): Promise<Receita | null> {
   const snap = await getDoc(doc(receitasCol(uid), id));
   if (!snap.exists()) return null;

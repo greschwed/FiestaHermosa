@@ -9,15 +9,12 @@ import Icon from '@/components/Icon';
 import { useAuth } from '@/lib/auth-context';
 import { getInsumos } from '@/lib/firestore';
 import type { Insumo } from '@/lib/data';
-import { CATEGORIAS_INSUMO, fmtBRL, fmtNum } from '@/lib/data';
-
-const CATS = ['Todos', ...CATEGORIAS_INSUMO.slice(0, 5)];
+import { fmtBRL, fmtNum } from '@/lib/data';
 
 function ListaInsumosContent() {
   const { user } = useAuth();
   const [insumos, setInsumos] = useState<Insumo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('Todos');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -25,20 +22,15 @@ function ListaInsumosContent() {
     getInsumos(user.uid).then(data => { setInsumos(data); setLoading(false); });
   }, [user]);
 
-  const filtered = insumos.filter(i => {
-    if (filter !== 'Todos' && i.cat !== filter) return false;
-    if (search && !i.nome.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
+  const filtered = insumos.filter(i =>
+    !search || i.nome.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="app-shell">
       <StatusBar />
       <div className="appbar">
         <h1 className="serif">Insumos</h1>
-        <div className="actions">
-          <button className="iconbtn"><Icon name="filter" size={16} /></button>
-        </div>
       </div>
 
       <div style={{ padding: '0 22px 12px' }}>
@@ -48,18 +40,6 @@ function ListaInsumosContent() {
           </span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar insumo..." />
         </div>
-      </div>
-
-      <div style={{ padding: '0 22px 8px', display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
-        {CATS.map(c => (
-          <button key={c} onClick={() => setFilter(c)} style={{
-            padding: '7px 14px', borderRadius: 999, fontSize: 13, whiteSpace: 'nowrap',
-            border: '1px solid ' + (filter === c ? 'var(--terracotta)' : 'var(--line)'),
-            background: filter === c ? 'var(--terracotta)' : 'var(--surface)',
-            color: filter === c ? '#fff' : 'var(--ink-2)', fontWeight: filter === c ? 500 : 400,
-            cursor: 'pointer', fontFamily: 'inherit',
-          }}>{c}</button>
-        ))}
       </div>
 
       <div className="scroll">
@@ -81,13 +61,16 @@ function ListaInsumosContent() {
                     {ins.estoque < 2 && <span className="chip warn" style={{ padding: '2px 7px', fontSize: 10 }}>baixo</span>}
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>
-                    {ins.cat} · {fmtNum(ins.estoque)} {ins.un} em estoque
+                    {fmtNum(ins.estoque)} {ins.un} em estoque
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
+                <div style={{ textAlign: 'right', marginRight: 4 }}>
                   <div className="serif tnum" style={{ fontSize: 16 }}>{fmtBRL(ins.custoUn)}</div>
                   <div style={{ fontSize: 11, color: 'var(--ink-3)' }}>/{ins.un}</div>
                 </div>
+                <Link href={`/insumos/${ins.id}/editar`} className="iconbtn" style={{ width: 32, height: 32, flexShrink: 0 }}>
+                  <Icon name="edit" size={14} />
+                </Link>
               </div>
             ))}
         </div>

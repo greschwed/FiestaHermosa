@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { DM_Sans, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
 
-const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+});
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
   subsets: ["latin"],
   weight: "400",
   style: ["normal", "italic"],
@@ -23,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${geist.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}>
+    <html lang="pt-BR" className={`${dmSans.variable} ${cormorant.variable} ${jetbrainsMono.variable}`}>
       <body>
         <AuthProvider>{children}</AuthProvider>
       </body>

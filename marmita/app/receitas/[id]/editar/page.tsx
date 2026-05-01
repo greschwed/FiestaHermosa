@@ -2,20 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import StatusBar from '@/components/StatusBar';
 import AuthGuard from '@/components/AuthGuard';
 import Icon from '@/components/Icon';
+import ConfirmModal from '@/components/ConfirmModal';
 import { useAuth } from '@/lib/auth-context';
-import { getInsumos, addReceita } from '@/lib/firestore';
+import { getReceita, getInsumos, updateReceita, deleteReceita } from '@/lib/firestore';
 import type { Insumo } from '@/lib/data';
 import { CATEGORIAS_RECEITA, fmtBRL, fmtNum } from '@/lib/data';
 
 interface Item { id: string; qtd: number; }
 
-function CadastroReceitaContent() {
+function EditarReceitaContent() {
   const { user } = useAuth();
   const router = useRouter();
+  const { id } = useParams<{ id: string }>();
+
   const [insumos, setInsumos] = useState<Insumo[]>([]);
   const [nome, setNome] = useState('');
   const [cat, setCat] = useState('Tradicional');
@@ -25,28 +28,41 @@ function CadastroReceitaContent() {
   const [items, setItems] = useState<Item[]>([]);
   const [preparo, setPreparo] = useState<string[]>([]);
   const [picker, setPicker] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    getInsumos(user.uid).then(setInsumos);
-  }, [user]);
+    Promise.all([getReceita(user.uid, id), getInsumos(user.uid)]).then(([rec, ins]) => {
+      if (!rec) { router.replace('/receitas'); return; }
+      setNome(rec.nome);
+      setCat(rec.cat || 'Tradicional');
+      setRendimento(rec.rendimento || 1);
+      setMargem(rec.margem || 60);
+      setTaxa(rec.taxaApp || 0);
+      setItems(rec.ingredientes || []);
+      setPreparo(rec.preparo || []);
+      setInsumos(ins);
+      setLoading(false);
+    });
+  }, [user, id, router]);
 
   const detalhados = items.map(it => {
-    const ins = insumos.find(i => i.id === it.id)!;
+    const ins = insumos.find(i => i.id === it.id);
     if (!ins) return null;
     return { ...ins, qtd: it.qtd, custo: it.qtd * ins.custoUn };
   }).filter(Boolean) as (Insumo & { qtd: number; custo: number })[];
 
   const custoTotal = detalhados.reduce((s, d) => s + d.custo, 0);
   const custoPorcao = custoTotal / (rendimento || 1);
-  const precoBruto = custoPorcao * (1 + margem / 100);
-  const precoSugerido = precoBruto / (1 - taxa / 100);
+  const precoSugerido = (custoPorcao * (1 + margem / 100)) / (1 - taxa / 100);
 
-  const updateQtd = (id: string, delta: number) =>
-    setItems(items.map(it => it.id === id ? { ...it, qtd: Math.max(0, +(it.qtd + delta).toFixed(3)) } : it));
-  const removeItem = (id: string) => setItems(items.filter(it => it.id !== id));
-  const addItem = (id: string) => { setItems([...items, { id, qtd: 0.1 }]); setPicker(false); };
+  const updateQtd = (itemId: string, delta: number) =>
+    setItems(items.map(it => it.id === itemId ? { ...it, qtd: Math.max(0, +(it.qtd + delta).toFixed(3)) } : it));
+  const removeItem = (itemId: string) => setItems(items.filter(it => it.id !== itemId));
+  const addItem = (itemId: string) => { setItems([...items, { id: itemId, qtd: 0.1 }]); setPicker(false); };
 
   const addPasso = () => setPreparo([...preparo, '']);
   const updatePasso = (i: number, val: string) => setPreparo(preparo.map((p, idx) => idx === i ? val : p));
@@ -55,25 +71,39 @@ function CadastroReceitaContent() {
   const handleSave = async () => {
     if (!user || !nome) return;
     setSaving(true);
-    await addReceita(user.uid, {
+    await updateReceita(user.uid, id, {
       nome, cat, rendimento,
       custoTotal, custoPorcao, precoSugerido, margem, taxaApp: taxa,
-      foto: '',
       ingredientes: items,
       preparo: preparo.filter(p => p.trim()),
     });
-    router.push('/receitas');
+    router.push(`/receitas/${id}`);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!user) return;
+    setDeleting(true);
+    await deleteReceita(user.uid, id);
+    router.replace('/receitas');
   };
 
   const insumosDisponiveis = insumos.filter(i => !items.find(it => it.id === i.id));
+
+  if (loading) {
+    return (
+      <div className="app-shell" style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ color: 'var(--ink-3)', fontSize: 13 }}>Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell" style={{ position: 'relative' }}>
       <StatusBar />
       <div className="appbar">
-        <Link href="/receitas" className="iconbtn"><Icon name="arrowLeft" size={18} /></Link>
-        <span style={{ fontSize: 14, color: 'var(--ink-3)' }}>Nova receita</span>
-        <Link href="/receitas" className="iconbtn"><Icon name="close" size={16} /></Link>
+        <Link href={`/receitas/${id}`} className="iconbtn"><Icon name="arrowLeft" size={18} /></Link>
+        <span style={{ fontSize: 14, color: 'var(--ink-3)' }}>Editar receita</span>
+        <Link href={`/receitas/${id}`} className="iconbtn"><Icon name="close" size={16} /></Link>
       </div>
 
       <div className="scroll" style={{ paddingBottom: 160 }}>
@@ -173,6 +203,16 @@ function CadastroReceitaContent() {
               </button>
             </div>
           </div>
+
+          {/* Excluir */}
+          <div style={{ paddingTop: 8, borderTop: '1px solid var(--line)' }}>
+            <button
+              onClick={() => setConfirmDelete(true)}
+              style={{ width: '100%', padding: '12px', background: 'var(--danger-bg)', border: '1px solid var(--danger)', borderRadius: 10, color: 'var(--danger)', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            >
+              <Icon name="trash" size={16} /> Excluir receita
+            </button>
+          </div>
         </div>
       </div>
 
@@ -193,7 +233,7 @@ function CadastroReceitaContent() {
           </div>
         </div>
         <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleSave} disabled={saving || !nome}>
-          <Icon name="check" size={16} /> {saving ? 'Salvando...' : 'Salvar receita'}
+          <Icon name="check" size={16} /> {saving ? 'Salvando...' : 'Salvar alterações'}
         </button>
       </div>
 
@@ -214,14 +254,28 @@ function CadastroReceitaContent() {
                   <Icon name="plus" size={14} color="var(--terracotta)" />
                 </button>
               ))}
+              {insumosDisponiveis.length === 0 && (
+                <p style={{ textAlign: 'center', color: 'var(--ink-3)', fontSize: 13, padding: '12px 0' }}>Todos os insumos já foram adicionados.</p>
+              )}
             </div>
           </div>
         </div>
+      )}
+
+      {confirmDelete && (
+        <ConfirmModal
+          title="Excluir receita?"
+          message="Esta ação não pode ser desfeita."
+          confirmLabel={deleting ? 'Excluindo...' : 'Excluir'}
+          danger
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setConfirmDelete(false)}
+        />
       )}
     </div>
   );
 }
 
-export default function CadastroReceita() {
-  return <AuthGuard><CadastroReceitaContent /></AuthGuard>;
+export default function EditarReceita() {
+  return <AuthGuard><EditarReceitaContent /></AuthGuard>;
 }
