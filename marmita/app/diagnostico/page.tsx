@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where, orderBy, setDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, setDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
@@ -30,6 +30,21 @@ interface CheckResult {
 
 interface ImportResult { imported: number; skipped: number; errors: string[] }
 
+function classifyReceita(nome: string): string {
+  const n = nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  if (/\b(bolo|cupcake|muffin)\b/.test(n)) return 'Bolos';
+  if (/\b(pao|paes|broa|focaccia|ciabatta|croissant|brioche|bisnaga|pao de)\b/.test(n)) return 'Pães';
+  if (/\b(biscoito|bolacha|cookie)\b/.test(n)) return 'Biscoitos e Bolachas';
+  if (/\b(trufa|trufas)\b/.test(n) || /\bchocolate\b/.test(n)) return 'Chocolates e Trufas';
+  if (/\b(torta|quiche|empadao)\b/.test(n)) {
+    if (/salgad|frango|atum|queijo|legum|vegetal|carne|presunto|espinafre|alho|bacon/.test(n)) return 'Tortas Salgadas';
+    return 'Tortas Doce';
+  }
+  if (/\b(coxinha|pastel|esfiha|empada|croquete|risole|bolinha|salgado|petisco|quibe)\b/.test(n)) return 'Salgados e Petiscos';
+  if (/\b(brigadeiro|beijinho|docinho|mousse|pudim|flan|pirulito|caramelo|doce)\b/.test(n)) return 'Doces';
+  return '';
+}
+
 export default function DiagnosticoPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -38,6 +53,8 @@ export default function DiagnosticoPage() {
   const [checking, setChecking] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [categorizing, setCategorizing] = useState(false);
+  const [catResult, setCatResult] = useState<{ updated: number; unchanged: number; unknown: string[] } | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
@@ -159,6 +176,24 @@ export default function DiagnosticoPage() {
     }
   };
 
+  const autoCategorize = async () => {
+    if (!user) return;
+    setCategorizing(true);
+    setCatResult(null);
+    const snap = await getDocs(collection(db, 'users', user.uid, 'receitas'));
+    const res = { updated: 0, unchanged: 0, unknown: [] as string[] };
+    await Promise.all(snap.docs.map(async d => {
+      const nome = (d.data().nome as string) ?? '';
+      const cat = classifyReceita(nome);
+      if (!cat) { res.unknown.push(nome); return; }
+      if (d.data().cat === cat) { res.unchanged++; return; }
+      await updateDoc(doc(db, 'users', user.uid, 'receitas', d.id), { cat });
+      res.updated++;
+    }));
+    setCatResult(res);
+    setCategorizing(false);
+  };
+
   if (loading || !user) return null;
 
   const myInsumoIds = result ? new Set(result.newInsumos.map(i => i.id)) : new Set<string>();
@@ -179,7 +214,24 @@ export default function DiagnosticoPage() {
         <button onClick={importFromOtherAccounts} disabled={checking || importing} style={btnStyle('#c2603e')}>
           {importing ? 'Importando…' : '📥 Importar dados de outras contas'}
         </button>
+        <button onClick={autoCategorize} disabled={categorizing} style={btnStyle('#2a7a2a')}>
+          {categorizing ? 'Categorizando…' : '🏷️ Auto-categorizar receitas por nome'}
+        </button>
       </div>
+
+      {catResult && (
+        <div style={{ background: '#d4edda', border: '1px solid #28a745', padding: 16, borderRadius: 8, marginBottom: 20 }}>
+          <strong>Categorização concluída</strong><br />
+          ✅ {catResult.updated} receita(s) atualizadas &nbsp;|&nbsp;
+          ⏭ {catResult.unchanged} já corretas
+          {catResult.unknown.length > 0 && (
+            <div style={{ marginTop: 8, color: '#856404' }}>
+              ⚠️ Não reconhecidas (mantidas sem alteração):{' '}
+              <em>{catResult.unknown.join(', ')}</em>
+            </div>
+          )}
+        </div>
+      )}
 
       {error && (
         <div style={{ background: '#fee', border: '1px solid #c00', padding: 12, borderRadius: 8, marginBottom: 16 }}>
