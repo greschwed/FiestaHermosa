@@ -1,0 +1,469 @@
+/* css/style.css */
+
+/* === PALETA DE CORES PASTEL & FONTES === */
+:root {
+    --background-light: #FEFBF9;
+    --text-primary: #4E342E;
+    --text-secondary: #795548;
+    --primary-color: #FFAB91; /* Coral pastel */
+    --primary-hover: #FF8A65;
+    --secondary-color: #DCE775; /* Lima pastel */
+    --accent-color: #A5D6A7; /* Verde pastel */
+    --accent-hover: #81C784;
+    --card-background: #FFFFFF;
+    --border-color: #E0E0E0;
+    --header-background: linear-gradient(135deg, #A1887F, #795548);
+    --header-text: #FFFFFF;
+    --footer-background: #4E342E;
+    --footer-text: #EFEBE9;
+    --danger-color: #EF9A9A;
+    --danger-hover: #E57373;
+    
+    --font-headings: 'Playfair Display', serif;
+    --font-body: 'Montserrat', sans-serif;
+}
+
+/* === GERAL & RESET BÁSICO === */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    line-height: 1.7;
+    background-color: var(--background-light);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+main#app-content {
+    flex-grow: 1; /* Faz o main ocupar o espaço disponível */
+}
+
+h1, h2, h3 {
+    font-family: var(--font-headings);
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+h1 {
+    font-size: 2.2em;
+}
+
+h2 {
+    font-size: 2em;
+    text-align: center;
+    margin: 1.5em 0 1em 0;
+}
+
+h2 i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+h3 {
+    font-size: 1.4em;
+    color: var(--text-secondary);
+    margin-bottom: 0.8em;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #E0E0E0;
+}
+
+h3 i {
+    margin-right: 8px;
+}
+
+p {
+    margin-bottom: 1em;
+}
+
+ul {
+    list-style: none;
+}
+
+/* === HEADER & AUTENTICAÇÃO === */
+header {
+    background: var(--header-background);
+    color: var(--header-text);
+    padding: 1.5em 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    color: var(--header-text);
+    margin: 0;
+}
+
+#auth-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#auth-container p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+/* === NAVEGAÇÃO PRINCIPAL === */
+#app-nav {
+    background-color: #fff;
+    padding: 1em 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-bottom: 1px solid var(--border-color);
+}
+
+#app-nav .container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* === ESTILOS GERAIS PARA SEÇÕES DE CONTEÚDO === */
+main#app-content section {
+    padding: 25px 30px;
+    background-color: var(--card-background);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+    border: 1px solid var(--border-color);
+    margin-top: 30px;
+}
+
+/* === BOTÕES === */
+button, .button-style {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: 600;
+    font-family: var(--font-body);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+button:hover, .button-style:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+#app-nav button {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+#app-nav button:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+#login-google-btn, #logout-btn {
+    background-color: #fff;
+    color: var(--text-secondary);
+}
+#login-google-btn:hover, #logout-btn:hover {
+    background-color: var(--background-light);
+}
+
+button.btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+button.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+button.btn-secondary {
+    background-color: #B0BEC5;
+    color: #fff;
+}
+button.btn-secondary:hover {
+    background-color: #90A4AE;
+}
+
+button.btn-add {
+    background-color: var(--accent-color);
+    color: #fff;
+    width: 100%;
+    margin: 10px 0;
+}
+button.btn-add:hover {
+    background-color: var(--accent-hover);
+}
+
+.remover-ingrediente-btn {
+    background-color: transparent;
+    color: var(--danger-color);
+    padding: 6px 12px;
+    font-size: 0.9em;
+    border: none;
+    box-shadow: none;
+}
+.remover-ingrediente-btn:hover {
+    color: #fff;
+    background-color: var(--danger-hover);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* === FORMULÁRIOS === */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+form fieldset {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #fcfcfc;
+}
+
+form fieldset legend {
+    font-family: var(--font-headings);
+    font-size: 1.15em;
+    font-weight: 700;
+    color: var(--text-secondary);
+    padding: 0 10px;
+    margin-left: 5px;
+}
+
+form label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+
+form input[type="text"],
+form input[type="number"],
+form select,
+form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    background-color: #fff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+form input:focus, form select:focus, form textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 171, 145, 0.3);
+    outline: none;
+}
+
+form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+p.cost-preview {
+    margin: 10px 0;
+    padding: 12px;
+    background-color: var(--background-light);
+    border-radius: 8px;
+    font-size: 1em;
+    border: 1px dashed var(--accent-color);
+}
+p.cost-preview strong {
+    color: var(--text-secondary);
+}
+p.cost-preview span {
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+/* === LISTA DE RECEITAS === */
+#receitas-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.receita-item { /* CORRIGIDO DE .recipe-card PARA .receita-item */
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+.receita-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.receita-item h3 {
+    padding: 20px;
+    margin: 0;
+    background-color: var(--primary-color);
+    color: #fff;
+    border-bottom: none;
+}
+.receita-item .details {
+    padding: 20px;
+    flex-grow: 1;
+}
+.receita-item p {
+    font-size: 0.95em;
+    color: var(--text-secondary);
+    margin-bottom: 0.5em;
+}
+
+/* === DETALHES DA RECEITA === */
+.cost-details {
+    background-color: var(--background-light);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px dashed var(--border-color);
+}
+#detalhe-receita-ingredientes {
+    list-style: none;
+    padding-left: 0;
+}
+#detalhe-receita-ingredientes li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+#detalhe-receita-ingredientes li:before {
+    content: '\f1b0'; /* Ícone de uma folha/tempero */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: var(--accent-color);
+    margin-right: 10px;
+}
+
+
+/* === LISTA DE MATERIAIS === */
+.list-wrapper {
+    margin-top: 40px;
+}
+#lista-materiais-cadastrados li {
+    background-color: #fcfcfc;
+    padding: 12px 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    transition: background-color 0.3s;
+}
+#lista-materiais-cadastrados li:hover {
+    background-color: var(--background-light);
+}
+
+.ingrediente-item-form {
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+}
+.ingrediente-item-form > * {
+    flex: 1 1 150px;
+}
+
+/* === FOOTER === */
+footer {
+    text-align: center;
+    padding: 2em 0;
+    background-color: var(--footer-background);
+    color: var(--footer-text);
+    font-size: 0.9em;
+    margin-top: 40px; /* Garante espaço acima do rodapé */
+}
+
+/* === MEDIA QUERIES PARA RESPONSIVIDADE === */
+@media (max-width: 768px) {
+    header .container {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    #app-nav .container {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #app-nav button {
+        width: 90%;
+        max-width: 400px;
+    }
+
+    .action-buttons {
+        justify-content: center;
+    }
+    .action-buttons button {
+        flex-grow: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 1.8em; }
+    h2 { font-size: 1.5em; }
+
+    main#app-content section {
+        padding: 20px 15px;
+    }
+}
