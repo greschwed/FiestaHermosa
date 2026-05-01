@@ -102,7 +102,16 @@ export const RECEITAS: Receita[] = [
 ];
 
 export const CATEGORIAS_INSUMO = ['Grãos', 'Proteínas', 'Hortifruti', 'Mercearia', 'Embalagens', 'Laticínios', 'Temperos'];
-export const CATEGORIAS_RECEITA = ['Fitness', 'Tradicional', 'Vegano', 'Vegetariano', 'Low carb'];
+export const CATEGORIAS_RECEITA = [
+  'Pães',
+  'Bolos',
+  'Doces',
+  'Tortas Doce',
+  'Tortas Salgadas',
+  'Salgados e Petiscos',
+  'Biscoitos e Bolachas',
+  'Chocolates e Trufas',
+];
 export const UNIDADES = ['kg', 'g', 'L', 'ml', 'un'];
 
 export function fmtBRL(n: number): string {
