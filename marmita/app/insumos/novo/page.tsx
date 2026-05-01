@@ -17,7 +17,6 @@ function CadastroInsumoContent() {
   const [un, setUn] = useState('kg');
   const [preco, setPreco] = useState('');
   const [qtd, setQtd] = useState('1');
-  const [estoque, setEstoque] = useState('');
   const [saving, setSaving] = useState(false);
 
   const custoUn = (parseFloat(preco) || 0) / (parseFloat(qtd) || 1);
@@ -30,7 +29,7 @@ function CadastroInsumoContent() {
       precoCompra: parseFloat(preco),
       qtdCompra: parseFloat(qtd),
       custoUn,
-      estoque: parseFloat(estoque) || 0,
+      estoque: 0,
       ultCompra: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
       emoji: '📦',
     });
@@ -93,13 +92,6 @@ function CadastroInsumoContent() {
             </div>
           </div>
 
-          <div className="field">
-            <label>Estoque atual</label>
-            <div className="input-prefix">
-              <input value={estoque} onChange={e => setEstoque(e.target.value)} placeholder="0" />
-              <span className="suffix">{un}</span>
-            </div>
-          </div>
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginTop: 24 }}>

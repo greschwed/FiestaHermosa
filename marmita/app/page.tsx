@@ -9,7 +9,7 @@ import Icon from '@/components/Icon';
 import { useAuth } from '@/lib/auth-context';
 import { getInsumos, getReceitas } from '@/lib/firestore';
 import type { Insumo, Receita } from '@/lib/data';
-import { fmtBRL, fmtNum } from '@/lib/data';
+import { fmtBRL } from '@/lib/data';
 
 function DashboardContent() {
   const { user, signOutUser } = useAuth();
@@ -26,7 +26,6 @@ function DashboardContent() {
     });
   }, [user]);
 
-  const estoqueBaixo = insumos.filter(i => i.estoque < 2).length;
   const custoMedio = receitas.length
     ? receitas.reduce((s, r) => s + r.custoPorcao, 0) / receitas.length
     : 0;
@@ -90,15 +89,6 @@ function DashboardContent() {
             <div className="serif" style={{ fontSize: 22, fontWeight: 600, marginTop: 8 }}>{loading ? '—' : fmtBRL(custoMedio)}</div>
             <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>Custo médio/porção</div>
           </div>
-          <div className="card" style={{
-            padding: 14,
-            background: estoqueBaixo > 0 ? 'var(--warn-bg)' : 'var(--surface)',
-            borderColor: estoqueBaixo > 0 ? 'var(--warn)' : 'var(--line)',
-          }}>
-            <Icon name="info" size={18} color={estoqueBaixo > 0 ? 'var(--warn)' : 'var(--ink-3)'} />
-            <div className="serif" style={{ fontSize: 22, fontWeight: 600, marginTop: 8 }}>{loading ? '—' : estoqueBaixo}</div>
-            <div style={{ fontSize: 12, color: estoqueBaixo > 0 ? 'var(--warn)' : 'var(--ink-3)' }}>Estoque baixo</div>
-          </div>
         </div>
 
         {/* Receitas */}
@@ -111,7 +101,6 @@ function DashboardContent() {
             ? <div style={{ padding: 20, textAlign: 'center', color: 'var(--ink-3)', fontSize: 13 }}>Carregando...</div>
             : receitas.slice(0, 4).map((r, i) => (
               <Link key={r.id} href={`/receitas/${r.id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderBottom: i < 3 ? '1px solid var(--line)' : 'none', textDecoration: 'none', color: 'inherit' }}>
-                <div className="img-placeholder" style={{ width: 46, height: 46, fontSize: 9 }}>img</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.nome}</div>
                   <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>
@@ -123,25 +112,6 @@ function DashboardContent() {
             ))}
         </div>
 
-        {/* Estoque baixo */}
-        {!loading && estoqueBaixo > 0 && (
-          <>
-            <div className="row" style={{ margin: '14px 0 10px' }}>
-              <div className="serif" style={{ fontSize: 20 }}>Repor estoque</div>
-            </div>
-            <div className="card-soft">
-              {insumos.filter(i => i.estoque < 2).slice(0, 3).map((ins, i, arr) => (
-                <div key={ins.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px dashed var(--line-2)' : 'none' }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>{ins.emoji} {ins.nome}</div>
-                    <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>{fmtNum(ins.estoque)} {ins.un} restantes</div>
-                  </div>
-                  <span className="chip warn">baixo</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
       </div>
 
       <BottomNav />

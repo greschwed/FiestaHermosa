@@ -10,7 +10,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import { useAuth } from '@/lib/auth-context';
 import { getReceita, getInsumos, updateReceita, deleteReceita } from '@/lib/firestore';
 import type { Insumo } from '@/lib/data';
-import { CATEGORIAS_RECEITA, fmtBRL, fmtNum } from '@/lib/data';
+import { CATEGORIAS_RECEITA, fmtBRL } from '@/lib/data';
 
 interface Item { id: string; qtd: number; }
 
@@ -28,6 +28,7 @@ function EditarReceitaContent() {
   const [items, setItems] = useState<Item[]>([]);
   const [preparo, setPreparo] = useState<string[]>([]);
   const [picker, setPicker] = useState(false);
+  const [pickerSearch, setPickerSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -61,8 +62,13 @@ function EditarReceitaContent() {
 
   const updateQtd = (itemId: string, delta: number) =>
     setItems(items.map(it => it.id === itemId ? { ...it, qtd: Math.max(0, +(it.qtd + delta).toFixed(3)) } : it));
+  const setItemQtd = (itemId: string, val: string) => {
+    const num = Math.max(0, parseFloat(val) || 0);
+    setItems(items.map(it => it.id === itemId ? { ...it, qtd: num } : it));
+  };
   const removeItem = (itemId: string) => setItems(items.filter(it => it.id !== itemId));
-  const addItem = (itemId: string) => { setItems([...items, { id: itemId, qtd: 0.1 }]); setPicker(false); };
+  const closePicker = () => { setPicker(false); setPickerSearch(''); };
+  const addItem = (itemId: string) => { setItems([...items, { id: itemId, qtd: 0.1 }]); closePicker(); };
 
   const addPasso = () => setPreparo([...preparo, '']);
   const updatePasso = (i: number, val: string) => setPreparo(preparo.map((p, idx) => idx === i ? val : p));
@@ -145,7 +151,7 @@ function EditarReceitaContent() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--surface-2)', borderRadius: 999, padding: 2 }}>
                     <button onClick={() => updateQtd(d.id, -0.1)} style={{ width: 24, height: 24, borderRadius: '50%', border: 'none', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Icon name="minus" size={12} /></button>
-                    <span className="tnum" style={{ fontSize: 12, minWidth: 42, textAlign: 'center' }}>{fmtNum(d.qtd, d.un === 'un' ? 0 : 2)}</span>
+                    <input type="number" value={d.qtd} min={0} step={d.un === 'un' ? 1 : 0.1} onChange={e => setItemQtd(d.id, e.target.value)} className="tnum" style={{ fontSize: 12, width: 42, textAlign: 'center', border: 'none', background: 'transparent', outline: 'none', padding: 0 }} />
                     <button onClick={() => updateQtd(d.id, 0.1)} style={{ width: 24, height: 24, borderRadius: '50%', border: 'none', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Icon name="plus" size={12} /></button>
                   </div>
                   <div className="tnum" style={{ fontSize: 12, color: 'var(--ink-3)', minWidth: 54, textAlign: 'right' }}>{fmtBRL(d.custo)}</div>
@@ -239,12 +245,16 @@ function EditarReceitaContent() {
 
       {/* Picker de insumos */}
       {picker && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(42,31,23,0.4)', display: 'flex', alignItems: 'flex-end', zIndex: 40 }} onClick={() => setPicker(false)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', width: '100%', maxWidth: 480, margin: '0 auto', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: '16px 18px 32px', maxHeight: '60vh', overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(42,31,23,0.4)', display: 'flex', alignItems: 'flex-end', zIndex: 40 }} onClick={closePicker}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', width: '100%', maxWidth: 480, margin: '0 auto', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: '16px 18px 32px', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
             <div style={{ width: 36, height: 4, background: 'var(--line-2)', borderRadius: 2, margin: '0 auto 14px' }} />
             <div className="serif" style={{ fontSize: 18, marginBottom: 12 }}>Adicionar insumo</div>
-            <div className="col gap-2">
-              {insumosDisponiveis.map(ins => (
+            <div className="input-prefix" style={{ borderRadius: 10, marginBottom: 10, flexShrink: 0 }}>
+              <span className="prefix" style={{ background: 'transparent' }}><Icon name="search" size={14} color="var(--ink-3)" /></span>
+              <input value={pickerSearch} onChange={e => setPickerSearch(e.target.value)} placeholder="Buscar insumo..." autoFocus />
+            </div>
+            <div className="col gap-2" style={{ overflowY: 'auto' }}>
+              {insumosDisponiveis.filter(i => !pickerSearch || i.nome.toLowerCase().includes(pickerSearch.toLowerCase())).map(ins => (
                 <button key={ins.id} onClick={() => addItem(ins.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--surface-2)', border: 'none', borderRadius: 10, textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}>
                   <span style={{ fontSize: 18 }}>{ins.emoji}</span>
                   <div style={{ flex: 1 }}>
@@ -254,9 +264,6 @@ function EditarReceitaContent() {
                   <Icon name="plus" size={14} color="var(--terracotta)" />
                 </button>
               ))}
-              {insumosDisponiveis.length === 0 && (
-                <p style={{ textAlign: 'center', color: 'var(--ink-3)', fontSize: 13, padding: '12px 0' }}>Todos os insumos já foram adicionados.</p>
-              )}
             </div>
           </div>
         </div>

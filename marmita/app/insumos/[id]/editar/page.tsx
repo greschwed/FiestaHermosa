@@ -21,7 +21,6 @@ function EditarInsumoContent() {
   const [un, setUn] = useState('kg');
   const [preco, setPreco] = useState('');
   const [qtd, setQtd] = useState('1');
-  const [estoque, setEstoque] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -38,7 +37,6 @@ function EditarInsumoContent() {
       setUn(ins.un);
       setPreco(String(ins.precoCompra));
       setQtd(String(ins.qtdCompra));
-      setEstoque(String(ins.estoque));
       setLoading(false);
     });
   }, [user, id, router]);
@@ -51,7 +49,6 @@ function EditarInsumoContent() {
       precoCompra: parseFloat(preco),
       qtdCompra: parseFloat(qtd),
       custoUn,
-      estoque: parseFloat(estoque) || 0,
     });
     router.push('/insumos');
   };
@@ -135,13 +132,6 @@ function EditarInsumoContent() {
             </div>
           </div>
 
-          <div className="field">
-            <label>Estoque atual</label>
-            <div className="input-prefix">
-              <input value={estoque} onChange={e => setEstoque(e.target.value)} />
-              <span className="suffix">{un}</span>
-            </div>
-          </div>
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
