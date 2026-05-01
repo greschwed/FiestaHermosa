@@ -2,16 +2,28 @@
 
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Icon from '@/components/Icon';
 
 export default function LoginPage() {
-  const { user, loading, signInWithGoogle } = useAuth();
+  const { user, loading, authError, signInWithGoogle } = useAuth();
   const router = useRouter();
+  const [signingIn, setSigningIn] = useState(false);
 
   useEffect(() => {
     if (!loading && user) router.replace('/');
   }, [user, loading, router]);
+
+  const handleSignIn = async () => {
+    setSigningIn(true);
+    try {
+      await signInWithGoogle();
+    } catch {
+      // erro já capturado no authError
+    } finally {
+      setSigningIn(false);
+    }
+  };
 
   return (
     <div className="app-shell" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '100dvh' }}>
@@ -31,8 +43,28 @@ export default function LoginPage() {
           Gestão de receitas e insumos
         </p>
 
+        {authError && (
+          <div style={{
+            background: 'var(--danger-bg)',
+            border: '1px solid var(--danger)',
+            borderRadius: 10,
+            padding: '12px 16px',
+            marginBottom: 16,
+            fontSize: 13,
+            color: 'var(--danger)',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 8,
+          }}>
+            <Icon name="alertcircle" size={16} style={{ flexShrink: 0, marginTop: 1 }} />
+            {authError}
+          </div>
+        )}
+
         <button
-          onClick={signInWithGoogle}
+          onClick={handleSignIn}
+          disabled={signingIn || loading}
           className="btn"
           style={{
             width: '100%', justifyContent: 'center',
@@ -40,16 +72,31 @@ export default function LoginPage() {
             border: '1px solid var(--line)',
             padding: '14px 18px', fontSize: 15,
             boxShadow: '0 2px 8px rgba(74,49,30,0.08)',
+            opacity: signingIn || loading ? 0.7 : 1,
+            cursor: signingIn || loading ? 'not-allowed' : 'pointer',
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 18 18">
-            <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.17z"/>
-            <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.04a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/>
-            <path fill="#FBBC05" d="M4.5 10.48A4.8 4.8 0 014.5 7.5V5.43H1.83a8 8 0 000 7.12l2.67-2.07z"/>
-            <path fill="#EA4335" d="M8.98 3.58c1.32 0 2.5.45 3.44 1.35l2.54-2.54A8 8 0 001.83 5.43L4.5 7.5a4.8 4.8 0 014.48-3.92z"/>
-          </svg>
-          Entrar com Google
+          {signingIn ? (
+            <>
+              <Icon name="loader" size={18} style={{ animation: 'spin 1s linear infinite' }} />
+              Entrando…
+            </>
+          ) : (
+            <>
+              <svg width="18" height="18" viewBox="0 0 18 18">
+                <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.17z"/>
+                <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.04a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/>
+                <path fill="#FBBC05" d="M4.5 10.48A4.8 4.8 0 014.5 7.5V5.43H1.83a8 8 0 000 7.12l2.67-2.07z"/>
+                <path fill="#EA4335" d="M8.98 3.58c1.32 0 2.5.45 3.44 1.35l2.54-2.54A8 8 0 001.83 5.43L4.5 7.5a4.8 4.8 0 014.48-3.92z"/>
+              </svg>
+              Entrar com Google
+            </>
+          )}
         </button>
+
+        <style>{`
+          @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        `}</style>
       </div>
     </div>
   );
