@@ -1,7 +1,7 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { NextRequest, NextResponse } from 'next/server';
 
-const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 const PROMPT = `Analise esta imagem de receita e extraia as informações retornando SOMENTE um JSON válido, sem markdown, sem blocos de código, sem texto extra:
 {
@@ -26,13 +26,18 @@ export async function POST(req: NextRequest) {
       mediaType: string;
     };
 
-    const model = genai.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    const result = await model.generateContent([
-      { inlineData: { data: imageBase64, mimeType: mediaType } },
-      PROMPT,
-    ]);
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash-lite',
+      contents: [{
+        role: 'user',
+        parts: [
+          { inlineData: { data: imageBase64, mimeType: mediaType } },
+          { text: PROMPT },
+        ],
+      }],
+    });
 
-    const text = result.response.text();
+    const text = response.text ?? '';
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     const data = JSON.parse(jsonMatch?.[0] ?? text);
     return NextResponse.json(data);
