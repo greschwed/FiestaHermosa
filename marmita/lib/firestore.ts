@@ -64,6 +64,42 @@ export async function recalcReceitasComInsumo(uid: string, insumoId: string) {
   if (updates.length) await Promise.all(updates);
 }
 
+// Recalcula o custo de TODAS as receitas com base nos preços atuais dos insumos.
+// Retorna quantas receitas foram atualizadas.
+export async function recalcTodasReceitas(uid: string): Promise<number> {
+  const [insumosSnap, receitasSnap] = await Promise.all([
+    getDocs(insumosCol(uid)),
+    getDocs(receitasCol(uid)),
+  ]);
+
+  const insumoMap = new Map(
+    insumosSnap.docs.map(d => [d.id, { id: d.id, ...d.data() } as Insumo])
+  );
+
+  const updates: Promise<void>[] = [];
+
+  for (const snap of receitasSnap.docs) {
+    const rec = { id: snap.id, ...snap.data() } as Receita;
+    if (!rec.ingredientes?.length) continue;
+
+    const custoTotal = rec.ingredientes.reduce((s, ing) => {
+      const ins = insumoMap.get(ing.id);
+      return s + (ins ? ing.qtd * ins.custoUn : 0);
+    }, 0);
+    const custoPorcao = custoTotal / (rec.rendimento || 1);
+    const precoSugerido =
+      (custoPorcao * (1 + (rec.margem || 0) / 100)) /
+      (1 - (rec.taxaApp || 0) / 100);
+
+    updates.push(
+      updateDoc(doc(receitasCol(uid), snap.id), { custoTotal, custoPorcao, precoSugerido })
+    );
+  }
+
+  if (updates.length) await Promise.all(updates);
+  return updates.length;
+}
+
 // ── Receitas ─────────────────────────────────────────────
 export async function getReceitas(uid: string): Promise<Receita[]> {
   const snap = await getDocs(query(receitasCol(uid), orderBy('nome')));

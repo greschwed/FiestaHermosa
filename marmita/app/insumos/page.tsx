@@ -7,7 +7,7 @@ import BottomNav from '@/components/BottomNav';
 import AuthGuard from '@/components/AuthGuard';
 import Icon from '@/components/Icon';
 import { useAuth } from '@/lib/auth-context';
-import { getInsumos } from '@/lib/firestore';
+import { getInsumos, recalcTodasReceitas } from '@/lib/firestore';
 import type { Insumo } from '@/lib/data';
 import { fmtBRL } from '@/lib/data';
 
@@ -19,11 +19,23 @@ function ListaInsumosContent() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<Sort>('az');
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState('');
 
   useEffect(() => {
     if (!user) return;
     getInsumos(user.uid).then(data => { setInsumos(data); setLoading(false); });
   }, [user]);
+
+  const handleSync = async () => {
+    if (!user) return;
+    setSyncing(true);
+    setSyncMsg('');
+    const n = await recalcTodasReceitas(user.uid);
+    setSyncing(false);
+    setSyncMsg(`${n} receita${n !== 1 ? 's' : ''} atualizada${n !== 1 ? 's' : ''}`);
+    setTimeout(() => setSyncMsg(''), 3000);
+  };
 
   const filtered = insumos
     .filter(i => !search || i.nome.toLowerCase().includes(search.toLowerCase()))
@@ -34,15 +46,31 @@ function ListaInsumosContent() {
       <StatusBar />
       <div className="appbar">
         <h1 className="serif">Insumos</h1>
-        <button
-          onClick={() => setSort(s => s === 'az' ? 'za' : 'az')}
-          className="iconbtn"
-          title={sort === 'az' ? 'Ordenado A→Z' : 'Ordenado Z→A'}
-          style={{ fontSize: 11, fontWeight: 600, width: 'auto', borderRadius: 999, padding: '0 12px', gap: 4, display: 'flex', alignItems: 'center' }}
-        >
-          {sort === 'az' ? 'A→Z' : 'Z→A'}
-        </button>
+        <div className="actions">
+          <button
+            onClick={() => setSort(s => s === 'az' ? 'za' : 'az')}
+            className="iconbtn"
+            style={{ fontSize: 11, fontWeight: 600, width: 'auto', borderRadius: 999, padding: '0 12px' }}
+          >
+            {sort === 'az' ? 'A→Z' : 'Z→A'}
+          </button>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="iconbtn"
+            title="Atualizar custos das receitas"
+            style={{ color: syncing ? 'var(--ink-3)' : 'var(--terracotta)' }}
+          >
+            <Icon name="refresh" size={16} style={syncing ? { animation: 'spin 1s linear infinite' } : undefined} />
+          </button>
+        </div>
       </div>
+
+      {syncMsg && (
+        <div style={{ margin: '0 22px 8px', padding: '8px 14px', background: 'var(--surface-2)', borderRadius: 10, fontSize: 13, color: 'var(--ink-2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Icon name="check" size={14} color="var(--good)" /> {syncMsg}
+        </div>
+      )}
 
       <div style={{ padding: '0 22px 12px' }}>
         <div className="input-prefix" style={{ borderRadius: 12 }}>

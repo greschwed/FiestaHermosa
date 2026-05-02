@@ -353,3 +353,5 @@ input[type="range"] {
 }
 
 .divider { height: 1px; background: var(--line); margin: 14px 0; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
