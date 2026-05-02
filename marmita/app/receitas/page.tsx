@@ -62,6 +62,9 @@ function ListaReceitasContent() {
           >
             <Icon name="search" size={16} />
           </button>
+          <Link href="/receitas/importar" className="iconbtn" title="Importar por foto">
+            <Icon name="camera" size={16} />
+          </Link>
         </div>
       </div>
 
