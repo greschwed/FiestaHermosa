@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       mediaType: string;
     };
 
-    const model = genai.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genai.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const result = await model.generateContent([
       { inlineData: { data: imageBase64, mimeType: mediaType } },
       PROMPT,
