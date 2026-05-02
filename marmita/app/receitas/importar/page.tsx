@@ -65,7 +65,7 @@ function classifyNome(nome: string): string {
   return CATEGORIAS_RECEITA[0];
 }
 
-async function resizeToBase64(file: File): Promise<{ base64: string; mediaType: 'image/jpeg' }> {
+async function resizeToBase64(file: File): Promise<{ base64: string }> {
   return new Promise((resolve) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -80,7 +80,6 @@ async function resizeToBase64(file: File): Promise<{ base64: string; mediaType: 
       URL.revokeObjectURL(url);
       resolve({
         base64: canvas.toDataURL('image/jpeg', 0.85).split(',')[1],
-        mediaType: 'image/jpeg',
       });
     };
     img.src = url;
@@ -144,11 +143,11 @@ function ImportarReceitaContent() {
     setError('');
 
     try {
-      const { base64, mediaType } = await resizeToBase64(file);
+      const { base64 } = await resizeToBase64(file);
       const res = await fetch('/api/parse-receita', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: base64, mediaType }),
+        body: JSON.stringify({ imageBase64: base64 }),
       });
 
       if (!res.ok) throw new Error((await res.json()).error ?? 'Erro na análise');
