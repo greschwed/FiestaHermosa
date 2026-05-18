@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import Icon from '@/components/Icon';
 import { getCardapioItens } from '@/lib/firestore';
 import type { CardapioItem } from '@/lib/data';
@@ -45,9 +44,6 @@ export default function CardapioPage() {
           <span style={{ color: 'var(--terracotta)', fontSize: 12 }}>✦</span>
           <div style={{ flex: 1, height: 1, background: 'var(--line-2)' }} />
         </div>
-        <Link href="/cardapio/admin" style={{ position: 'absolute', top: 22, right: 18 }}>
-          <button className="iconbtn"><Icon name="settings" size={17} /></button>
-        </Link>
       </div>
 
       {/* Nav de categorias */}
