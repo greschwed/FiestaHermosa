@@ -39,7 +39,7 @@ export default function CardapioPage() {
     sectionRefs.current[cat]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const addItem = (id: string) => setCarrinho(c => ({ ...c, [id]: (c[id] || 0) + 1 }));
+  const addItem = (id: string, amount = 1) => setCarrinho(c => ({ ...c, [id]: (c[id] || 0) + amount }));
   const removeItem = (id: string) => setCarrinho(c => {
     const n = (c[id] || 0) - 1;
     if (n <= 0) { const { [id]: _, ...rest } = c; return rest; }
@@ -197,27 +197,27 @@ export default function CardapioPage() {
                                 Adicionar
                               </button>
                             ) : (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: 'var(--terracotta)', borderRadius: 20 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', background: 'var(--terracotta)', borderRadius: 20, overflow: 'hidden' }}>
                                 <button
                                   onClick={() => removeItem(item.id)}
-                                  style={{
-                                    width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    background: 'none', border: 'none', cursor: 'pointer', color: '#fff',
-                                  }}
+                                  style={{ width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer' }}
                                 >
-                                  <Icon name="minus" size={14} color="#fff" />
+                                  <Icon name="minus" size={13} color="#fff" />
                                 </button>
-                                <span style={{ fontSize: 15, fontWeight: 700, color: '#fff', minWidth: 20, textAlign: 'center' }}>
+                                <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', minWidth: 22, textAlign: 'center' }}>
                                   {qty}
                                 </span>
                                 <button
-                                  onClick={() => addItem(item.id)}
-                                  style={{
-                                    width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    background: 'none', border: 'none', cursor: 'pointer', color: '#fff',
-                                  }}
+                                  onClick={() => addItem(item.id, 1)}
+                                  style={{ height: 34, padding: '0 10px', display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,.15)', border: 'none', borderLeft: '1px solid rgba(255,255,255,.25)', cursor: 'pointer', color: '#fff', fontSize: 12, fontWeight: 700, fontFamily: 'inherit' }}
                                 >
-                                  <Icon name="plus" size={14} color="#fff" />
+                                  +1
+                                </button>
+                                <button
+                                  onClick={() => addItem(item.id, 10)}
+                                  style={{ height: 34, padding: '0 10px', display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,.28)', border: 'none', borderLeft: '1px solid rgba(255,255,255,.25)', cursor: 'pointer', color: '#fff', fontSize: 12, fontWeight: 700, fontFamily: 'inherit' }}
+                                >
+                                  +10
                                 </button>
                               </div>
                             )}
@@ -318,19 +318,25 @@ export default function CardapioPage() {
                         {fmtBRL(item.preco)} cada
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 20, overflow: 'hidden' }}>
                       <button
                         onClick={() => removeItem(item.id)}
                         style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer' }}
                       >
                         <Icon name="minus" size={13} />
                       </button>
-                      <span style={{ fontSize: 14, fontWeight: 600, minWidth: 18, textAlign: 'center' }}>{qty}</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, minWidth: 20, textAlign: 'center' }}>{qty}</span>
                       <button
-                        onClick={() => addItem(item.id)}
-                        style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer' }}
+                        onClick={() => addItem(item.id, 1)}
+                        style={{ height: 32, padding: '0 8px', display: 'flex', alignItems: 'center', background: 'var(--surface-3)', border: 'none', borderLeft: '1px solid var(--line)', cursor: 'pointer', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', color: 'var(--ink-2)' }}
                       >
-                        <Icon name="plus" size={13} />
+                        +1
+                      </button>
+                      <button
+                        onClick={() => addItem(item.id, 10)}
+                        style={{ height: 32, padding: '0 8px', display: 'flex', alignItems: 'center', background: 'var(--surface-3)', border: 'none', borderLeft: '1px solid var(--line)', cursor: 'pointer', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', color: 'var(--terracotta)' }}
+                      >
+                        +10
                       </button>
                     </div>
                     <div style={{ fontSize: 14, fontWeight: 600, minWidth: 72, textAlign: 'right' }}>
