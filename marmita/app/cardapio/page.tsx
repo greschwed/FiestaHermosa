@@ -8,7 +8,7 @@ import { getCardapioItens } from '@/lib/firestore';
 import type { CardapioItem } from '@/lib/data';
 import { CATEGORIAS_CARDAPIO, fmtBRL } from '@/lib/data';
 
-const WHATSAPP_NUMBER = '5511999999999';
+const WHATSAPP_NUMBER = '5511944462204';
 
 type Carrinho = Record<string, number>;
 
@@ -241,7 +241,7 @@ export default function CardapioPage() {
               Encomendas com antecedência
             </div>
             <div style={{ fontSize: 11, color: 'var(--ink-4)', letterSpacing: '.04em', marginTop: 4 }}>
-              @fiestahermosa
+              @fiesta_hermosa
             </div>
           </div>
         )}
