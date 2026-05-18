@@ -38,13 +38,20 @@ function AdminCardapioContent() {
       <StatusBar />
 
       <div className="appbar">
-        <button className="iconbtn" onClick={() => router.push('/cardapio')}>
+        <button className="iconbtn" onClick={() => router.push('/')}>
           <Icon name="arrowLeft" size={18} />
         </button>
         <h1 className="serif">Cardápio</h1>
-        <Link href="/cardapio/admin/novo">
-          <button className="iconbtn"><Icon name="plus" size={20} /></button>
-        </Link>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <Link href="/cardapio">
+            <button className="iconbtn" title="Visualizar cardápio público">
+              <Icon name="eye" size={18} />
+            </button>
+          </Link>
+          <Link href="/cardapio/admin/novo">
+            <button className="iconbtn"><Icon name="plus" size={20} /></button>
+          </Link>
+        </div>
       </div>
 
       <div className="scroll" style={{ paddingBottom: 80 }}>
