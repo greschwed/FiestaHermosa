@@ -8,6 +8,7 @@ const items = [
   { href: '/', label: 'Início', icon: 'home' },
   { href: '/insumos', label: 'Insumos', icon: 'package' },
   { href: '/receitas', label: 'Receitas', icon: 'book' },
+  { href: '/cardapio', label: 'Cardápio', icon: 'receipt' },
 ];
 
 export default function BottomNav() {

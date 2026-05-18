@@ -114,6 +114,25 @@ export const CATEGORIAS_RECEITA = [
 ];
 export const UNIDADES = ['kg', 'g', 'L', 'ml', 'un'];
 
+export interface CardapioItem {
+  id: string;
+  nome: string;
+  categoria: string;
+  preco: number;
+  descricao?: string;
+  foto?: string;
+  ordem: number;
+}
+
+export const CATEGORIAS_CARDAPIO = [
+  'Kits e Caixas',
+  'Bem Casados',
+  'Doces Finos',
+  'Bolos',
+  'Tortas',
+  'Personalizados',
+];
+
 export function fmtBRL(n: number): string {
   return 'R$ ' + (n || 0).toFixed(2).replace('.', ',');
 }

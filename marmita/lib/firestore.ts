@@ -3,8 +3,9 @@ import {
   addDoc, setDoc, deleteDoc, updateDoc,
   query, orderBy, where, serverTimestamp,
 } from 'firebase/firestore';
-import { db } from './firebase';
-import type { Insumo, Receita } from './data';
+import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { db, storage } from './firebase';
+import type { Insumo, Receita, CardapioItem } from './data';
 
 // Collections scoped per user
 const insumosCol = (uid: string) => collection(db, 'users', uid, 'insumos');
@@ -129,6 +130,57 @@ export async function updateReceita(uid: string, id: string, data: Partial<Recei
 
 export async function deleteReceita(uid: string, id: string) {
   await deleteDoc(doc(receitasCol(uid), id));
+}
+
+// ── Cardápio ─────────────────────────────────────────────
+const cardapioCol = (uid: string) => collection(db, 'users', uid, 'cardapio');
+
+export async function getCardapioItens(uid: string): Promise<CardapioItem[]> {
+  const snap = await getDocs(query(cardapioCol(uid), orderBy('ordem')));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() } as CardapioItem));
+}
+
+export async function getCardapioItem(uid: string, id: string): Promise<CardapioItem | null> {
+  const snap = await getDoc(doc(cardapioCol(uid), id));
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...snap.data() } as CardapioItem;
+}
+
+export async function addCardapioItem(
+  uid: string,
+  item: Omit<CardapioItem, 'id'>,
+  file?: File,
+): Promise<string> {
+  const ref = await addDoc(cardapioCol(uid), { ...item, criadoEm: serverTimestamp() });
+  if (file) {
+    const photo = storageRef(storage, `users/${uid}/cardapio/${ref.id}`);
+    await uploadBytes(photo, file);
+    const url = await getDownloadURL(photo);
+    await updateDoc(ref, { foto: url });
+  }
+  return ref.id;
+}
+
+export async function updateCardapioItem(
+  uid: string,
+  id: string,
+  data: Partial<Omit<CardapioItem, 'id'>>,
+  file?: File,
+) {
+  const update: Record<string, unknown> = { ...data };
+  if (file) {
+    const photo = storageRef(storage, `users/${uid}/cardapio/${id}`);
+    await uploadBytes(photo, file);
+    update.foto = await getDownloadURL(photo);
+  }
+  await updateDoc(doc(cardapioCol(uid), id), update);
+}
+
+export async function deleteCardapioItem(uid: string, id: string) {
+  try {
+    await deleteObject(storageRef(storage, `users/${uid}/cardapio/${id}`));
+  } catch { /* foto pode não existir */ }
+  await deleteDoc(doc(cardapioCol(uid), id));
 }
 
 // ── Migração do projeto legado (fiesta-hermosa vanilla JS) ───────────────
