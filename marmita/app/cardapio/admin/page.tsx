@@ -8,30 +8,27 @@ import BottomNav from '@/components/BottomNav';
 import AuthGuard from '@/components/AuthGuard';
 import ConfirmModal from '@/components/ConfirmModal';
 import Icon from '@/components/Icon';
-import { useAuth } from '@/lib/auth-context';
 import { getCardapioItens, deleteCardapioItem } from '@/lib/firestore';
 import type { CardapioItem } from '@/lib/data';
 import { CATEGORIAS_CARDAPIO, fmtBRL } from '@/lib/data';
 
 function AdminCardapioContent() {
-  const { user } = useAuth();
   const router = useRouter();
   const [itens, setItens] = useState<CardapioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletando, setDeletando] = useState<CardapioItem | null>(null);
 
   useEffect(() => {
-    if (!user) return;
-    getCardapioItens(user.uid).then(data => { setItens(data); setLoading(false); });
-  }, [user]);
+    getCardapioItens().then(data => { setItens(data); setLoading(false); });
+  }, []);
 
   const cats = CATEGORIAS_CARDAPIO.filter(c => itens.some(i => i.categoria === c));
   const semCategoria = itens.filter(i => !CATEGORIAS_CARDAPIO.includes(i.categoria));
   const todasCats = [...cats, ...(semCategoria.length ? [semCategoria[0].categoria] : [])];
 
   async function handleDelete() {
-    if (!user || !deletando) return;
-    await deleteCardapioItem(user.uid, deletando.id);
+    if (!deletando) return;
+    await deleteCardapioItem(deletando.id);
     setItens(prev => prev.filter(i => i.id !== deletando.id));
     setDeletando(null);
   }
@@ -84,11 +81,8 @@ function AdminCardapioContent() {
                       borderRadius: 'var(--radius-sm)', padding: '10px 12px', marginBottom: 8,
                     }}>
                       {item.foto ? (
-                        <img
-                          src={item.foto}
-                          alt={item.nome}
-                          style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }}
-                        />
+                        <img src={item.foto} alt={item.nome}
+                          style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
                       ) : (
                         <div style={{
                           width: 48, height: 48, borderRadius: 8, flexShrink: 0,

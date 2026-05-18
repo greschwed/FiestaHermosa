@@ -4,31 +4,28 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import StatusBar from '@/components/StatusBar';
 import BottomNav from '@/components/BottomNav';
-import AuthGuard from '@/components/AuthGuard';
 import Icon from '@/components/Icon';
-import { useAuth } from '@/lib/auth-context';
 import { getCardapioItens } from '@/lib/firestore';
 import type { CardapioItem } from '@/lib/data';
 import { CATEGORIAS_CARDAPIO, fmtBRL } from '@/lib/data';
 
-function CardapioContent() {
-  const { user } = useAuth();
+export default function CardapioPage() {
   const [itens, setItens] = useState<CardapioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [catAtiva, setCatAtiva] = useState('');
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    if (!user) return;
-    getCardapioItens(user.uid).then(data => {
+    getCardapioItens().then(data => {
       setItens(data);
       setLoading(false);
-      const cats = [...new Set(data.map(i => i.categoria))];
+      const cats = CATEGORIAS_CARDAPIO.filter(c => data.some(i => i.categoria === c));
       if (cats.length) setCatAtiva(cats[0]);
     });
-  }, [user]);
+  }, []);
 
   const cats = CATEGORIAS_CARDAPIO.filter(c => itens.some(i => i.categoria === c));
+
   const scrollToCat = (cat: string) => {
     setCatAtiva(cat);
     sectionRefs.current[cat]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -89,15 +86,10 @@ function CardapioContent() {
         ) : itens.length === 0 ? (
           <div style={{ padding: 40, textAlign: 'center' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>🎂</div>
-            <div className="serif" style={{ fontSize: 22, marginBottom: 8 }}>Cardápio vazio</div>
-            <div style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: 24 }}>
-              Adicione seus primeiros itens no painel de gerenciamento.
+            <div className="serif" style={{ fontSize: 22, marginBottom: 8 }}>Cardápio em breve</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
+              Nossos itens serão publicados em breve.
             </div>
-            <Link href="/cardapio/admin">
-              <button className="btn btn-primary" style={{ borderRadius: 999 }}>
-                Gerenciar cardápio
-              </button>
-            </Link>
           </div>
         ) : (
           cats.map((cat, ci) => {
@@ -131,7 +123,6 @@ function CardapioContent() {
                           width: '100%', aspectRatio: '1/1',
                           background: 'var(--surface-3)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 48, color: 'var(--ink-4)',
                         }}>
                           <Icon name="image" size={48} color="var(--line-2)" />
                         </div>
@@ -173,8 +164,4 @@ function CardapioContent() {
       <BottomNav />
     </div>
   );
-}
-
-export default function CardapioPage() {
-  return <AuthGuard><CardapioContent /></AuthGuard>;
 }

@@ -1,0 +1,16 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Fotos do cardápio — leitura pública, escrita só com auth
+    match /cardapio/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Arquivos pessoais do usuário
+    match /users/{uid}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}

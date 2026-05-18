@@ -132,28 +132,27 @@ export async function deleteReceita(uid: string, id: string) {
   await deleteDoc(doc(receitasCol(uid), id));
 }
 
-// ── Cardápio ─────────────────────────────────────────────
-const cardapioCol = (uid: string) => collection(db, 'users', uid, 'cardapio');
+// ── Cardápio (coleção pública — leitura sem auth) ────────
+const cardapioCol = () => collection(db, 'cardapio');
 
-export async function getCardapioItens(uid: string): Promise<CardapioItem[]> {
-  const snap = await getDocs(query(cardapioCol(uid), orderBy('ordem')));
+export async function getCardapioItens(): Promise<CardapioItem[]> {
+  const snap = await getDocs(query(cardapioCol(), orderBy('ordem')));
   return snap.docs.map(d => ({ id: d.id, ...d.data() } as CardapioItem));
 }
 
-export async function getCardapioItem(uid: string, id: string): Promise<CardapioItem | null> {
-  const snap = await getDoc(doc(cardapioCol(uid), id));
+export async function getCardapioItem(id: string): Promise<CardapioItem | null> {
+  const snap = await getDoc(doc(cardapioCol(), id));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() } as CardapioItem;
 }
 
 export async function addCardapioItem(
-  uid: string,
   item: Omit<CardapioItem, 'id'>,
   file?: File,
 ): Promise<string> {
-  const ref = await addDoc(cardapioCol(uid), { ...item, criadoEm: serverTimestamp() });
+  const ref = await addDoc(cardapioCol(), { ...item, criadoEm: serverTimestamp() });
   if (file) {
-    const photo = storageRef(storage, `users/${uid}/cardapio/${ref.id}`);
+    const photo = storageRef(storage, `cardapio/${ref.id}`);
     await uploadBytes(photo, file);
     const url = await getDownloadURL(photo);
     await updateDoc(ref, { foto: url });
@@ -162,25 +161,24 @@ export async function addCardapioItem(
 }
 
 export async function updateCardapioItem(
-  uid: string,
   id: string,
   data: Partial<Omit<CardapioItem, 'id'>>,
   file?: File,
 ) {
   const update: Record<string, unknown> = { ...data };
   if (file) {
-    const photo = storageRef(storage, `users/${uid}/cardapio/${id}`);
+    const photo = storageRef(storage, `cardapio/${id}`);
     await uploadBytes(photo, file);
     update.foto = await getDownloadURL(photo);
   }
-  await updateDoc(doc(cardapioCol(uid), id), update);
+  await updateDoc(doc(cardapioCol(), id), update);
 }
 
-export async function deleteCardapioItem(uid: string, id: string) {
+export async function deleteCardapioItem(id: string) {
   try {
-    await deleteObject(storageRef(storage, `users/${uid}/cardapio/${id}`));
+    await deleteObject(storageRef(storage, `cardapio/${id}`));
   } catch { /* foto pode não existir */ }
-  await deleteDoc(doc(cardapioCol(uid), id));
+  await deleteDoc(doc(cardapioCol(), id));
 }
 
 // ── Migração do projeto legado (fiesta-hermosa vanilla JS) ───────────────
