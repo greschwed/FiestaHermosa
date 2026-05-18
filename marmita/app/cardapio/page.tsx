@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import StatusBar from '@/components/StatusBar';
-import BottomNav from '@/components/BottomNav';
 import Icon from '@/components/Icon';
 import { getCardapioItens } from '@/lib/firestore';
 import type { CardapioItem } from '@/lib/data';
@@ -33,7 +31,6 @@ export default function CardapioPage() {
 
   return (
     <div className="app-shell">
-      <StatusBar />
 
       {/* Cabeçalho */}
       <div style={{ padding: '24px 22px 16px', borderBottom: '1px solid var(--line)', position: 'relative' }}>
@@ -78,7 +75,7 @@ export default function CardapioPage() {
         </div>
       )}
 
-      <div className="scroll" style={{ paddingBottom: 80 }}>
+      <div className="scroll" style={{ paddingBottom: 32 }}>
         {loading ? (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink-3)', fontSize: 13 }}>
             Carregando cardápio...
@@ -161,7 +158,6 @@ export default function CardapioPage() {
         )}
       </div>
 
-      <BottomNav />
     </div>
   );
 }
